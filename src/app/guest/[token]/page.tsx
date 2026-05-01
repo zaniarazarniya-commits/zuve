@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useParams } from "next/navigation";
 import { CheckIcon } from "@/components/icons";
 import { upsells, activities, restaurants } from "@/lib/guest-data";
 import type { Booking } from "@/types/booking";
+
+// Globalt tillval-modal-state
+const UpsellModalContext = createContext<{
+  activeItem: typeof upsells[0] | null;
+  setActiveItem: (item: typeof upsells[0] | null) => void;
+}>({ activeItem: null, setActiveItem: () => {} });
 
 // ============================================================
 // STEG 0 — Laddning
@@ -437,12 +443,10 @@ function ExperienceCard({
 }
 
 function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] }) {
-  const [showConfirm, setShowConfirm] = useState(false);
+  const { setActiveItem } = useContext(UpsellModalContext);
   const [added, setAdded] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
 
   async function handleConfirm() {
-    setIsAdding(true);
     try {
       const res = await fetch("/api/extras", {
         method: "POST",
@@ -461,11 +465,9 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
         throw new Error(data.error || "Kunde inte skicka intresseanmälan");
       }
       setAdded(true);
-      setShowConfirm(false);
+      setActiveItem(null);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Kunde inte skicka intresseanmälan");
-    } finally {
-      setIsAdding(false);
     }
   }
 
@@ -484,9 +486,8 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
             </span>
           ) : (
             <button
-              onClick={() => setShowConfirm(true)}
-              disabled={isAdding}
-              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 active:scale-95 disabled:opacity-50"
+              onClick={() => setActiveItem(item)}
+              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 active:scale-95"
             >
               {item.price} {item.currency}
             </button>
@@ -494,36 +495,60 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
         }
       />
 
-      {/* Bekräftelsemodal */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5">
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
-              <p className="text-sm text-granite font-light">
-                Önskar du beställa detta hos receptionen?
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3.5 rounded-2xl text-sm font-medium text-granite bg-sand-light/30 hover:bg-sand-light/50 transition-all duration-500"
-              >
-                Nej, tack
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={isAdding}
-                className="flex-1 py-3.5 rounded-2xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 disabled:opacity-50"
-              >
-                {isAdding ? "Skickar..." : "Ja, tack"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Bekräftelsemodal — renderas globalt men knapparna finns här */}
+      <UpsellModal token={token} item={item} onConfirm={handleConfirm} />
     </>
+  );
+}
+
+function UpsellModal({
+  token,
+  item,
+  onConfirm,
+}: {
+  token: string;
+  item: typeof upsells[0];
+  onConfirm: () => Promise<void>;
+}) {
+  const { activeItem, setActiveItem } = useContext(UpsellModalContext);
+  const isOpen = activeItem?.id === item.id;
+  const [isAdding, setIsAdding] = useState(false);
+
+  if (!isOpen) return null;
+
+  async function handleClick() {
+    setIsAdding(true);
+    await onConfirm();
+    setIsAdding(false);
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5">
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+          <p className="text-sm text-granite font-light">
+            Önskar du beställa detta hos receptionen?
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setActiveItem(null)}
+            className="flex-1 py-3.5 rounded-2xl text-sm font-medium text-granite bg-sand-light/30 hover:bg-sand-light/50 transition-all duration-500"
+          >
+            Nej, tack
+          </button>
+          <button
+            onClick={handleClick}
+            disabled={isAdding}
+            className="flex-1 py-3.5 rounded-2xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 disabled:opacity-50"
+          >
+            {isAdding ? "Skickar..." : "Ja, tack"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -880,22 +905,26 @@ export default function GuestPage() {
   if (error) return <ErrorScreen message={error} />;
   if (!booking) return <ErrorScreen message="Bokningen hittades inte. Länken kan vara felaktig eller utgången." />;
 
+  const [activeItem, setActiveItem] = useState<typeof upsells[0] | null>(null);
+
   return (
-    <main className="min-h-full bg-background relative">
-      {step >= 2 && <MainScreen token={token!} booking={booking} onEdit={() => setStep(1)} />}
-      {step >= 1 && step < 2 && (
-        <DetailsFormScreen
-          token={token!}
-          initialPhone={booking.guest_phone}
-          initialEmail={booking.guest_email}
-          initialEta={booking.eta}
-          initialNotes={booking.notes}
-          onSaved={() => setStep(2)}
-        />
-      )}
-      {step === 0 && (
-        <WelcomeScreen firstName={booking.guest_first_name} onContinue={() => setStep(1)} />
-      )}
-    </main>
+    <UpsellModalContext.Provider value={{ activeItem, setActiveItem }}>
+      <main className="min-h-full bg-background relative">
+        {step >= 2 && <MainScreen token={token!} booking={booking} onEdit={() => setStep(1)} />}
+        {step >= 1 && step < 2 && (
+          <DetailsFormScreen
+            token={token!}
+            initialPhone={booking.guest_phone}
+            initialEmail={booking.guest_email}
+            initialEta={booking.eta}
+            initialNotes={booking.notes}
+            onSaved={() => setStep(2)}
+          />
+        )}
+        {step === 0 && (
+          <WelcomeScreen firstName={booking.guest_first_name} onContinue={() => setStep(1)} />
+        )}
+      </main>
+    </UpsellModalContext.Provider>
   );
 }
