@@ -232,15 +232,19 @@ export async function PATCH(
   }
 
   // --- Skicka admin-notifikation om komplettering ---
-  sendGuestUpdatedNotification({
-    guestName: `${booking.guest_first_name} ${booking.guest_last_name}`,
-    phone: booking.guest_phone,
-    eta: booking.eta,
-    notes: booking.notes,
-    bookingId: booking.sirvoy_booking_id ?? booking.id,
-  }).catch((err) => {
+  try {
+    console.log("[PATCH] Försöker skicka e-postnotis...")
+    await sendGuestUpdatedNotification({
+      guestName: `${booking.guest_first_name} ${booking.guest_last_name}`,
+      phone: booking.guest_phone,
+      eta: booking.eta,
+      notes: booking.notes,
+      bookingId: booking.sirvoy_booking_id ?? booking.id,
+    })
+    console.log("[PATCH] E-postnotis skickad")
+  } catch (err) {
     console.error("[PATCH] Kunde inte skicka e-postnotis:", err)
-  })
+  }
 
   return NextResponse.json({ booking })
 }
