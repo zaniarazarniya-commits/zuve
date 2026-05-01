@@ -182,23 +182,39 @@ export async function PATCH(
   // --- Skicka SMS om telefon lagts till för första gången OCH inte redan skickat ---
   const hasPhoneNow = Boolean(booking.guest_phone)
   const smsDisabled = process.env.DISABLE_SMS === "true"
+
+  console.log("[PATCH] SMS-debug:", {
+    hadPhoneBefore,
+    hasPhoneNow,
+    smsAlreadySent,
+    smsDisabled: smsDisabled || "false (not set)",
+    guest_phone: booking.guest_phone,
+    guest_language: booking.guest_language,
+  })
+
   if (smsDisabled) {
     console.log("[PATCH] SMS är AVSTÄNGT (DISABLE_SMS=true).")
   } else if (!hadPhoneBefore && hasPhoneNow && !smsAlreadySent) {
-    sendCompletionSms({
-      guest_first_name: booking.guest_first_name,
-      guest_phone: booking.guest_phone,
-      guest_token: token,
-      guest_language: booking.guest_language,
-    })
-      .then(async () => {
-        // Markera som skickat
-        await supabase.from("bookings").update({ sms_sent_at: new Date().toISOString() }).eq("id", booking.id)
-        console.log("[PATCH] SMS markerat som skickat")
+    console.log("[PATCH] Försöker skicka completion-SMS till:", booking.guest_phone)
+    try {
+      await sendCompletionSms({
+        guest_first_name: booking.guest_first_name,
+        guest_phone: booking.guest_phone,
+        guest_token: token,
+        guest_language: booking.guest_language,
       })
-      .catch((err: Error) => {
-        console.error("[PATCH] Kunde inte skicka SMS:", err)
-      })
+      // Markera som skickat
+      await supabase.from("bookings").update({ sms_sent_at: new Date().toISOString() }).eq("id", booking.id)
+      console.log("[PATCH] SMS skickat och markerat")
+    } catch (err) {
+      console.error("[PATCH] Kunde inte skicka SMS:", err)
+    }
+  } else {
+    console.log("[PATCH] SMS skickas INTE. Orsak:",
+      hadPhoneBefore ? "hade redan telefon" :
+      !hasPhoneNow ? "har fortfarande ingen telefon" :
+      "sms redan skickat"
+    )
   }
 
   // --- Skicka admin-notifikation om komplettering ---

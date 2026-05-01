@@ -84,15 +84,23 @@ export async function POST(request: Request) {
   }
 
   // --- Skicka e-postnotis till hotellet (fire-and-forget) ---
+  console.log("[Extras] Försöker skicka tillvalsnotis:", {
+    guest: `${booking.guest_first_name} ${booking.guest_last_name}`,
+    extra: title,
+    to: process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se",
+    smtp: process.env.SMTP_HOST ? "konfigurerad" : "SAKNAS",
+  })
   sendExtraAddedNotification({
     guestName: `${booking.guest_first_name} ${booking.guest_last_name}`,
     extraTitle: title,
     price,
     currency: currency ?? "SEK",
     bookingId: booking.sirvoy_booking_id ?? booking.id,
-  }).catch((err) => {
-    console.error("[Extras] Kunde inte skicka e-postnotis:", err)
   })
+    .then(() => console.log("[Extras] Tillvalsnotis skickad!"))
+    .catch((err) => {
+      console.error("[Extras] Kunde inte skicka e-postnotis:", err)
+    })
 
   return NextResponse.json(
     { message: "Tillval sparat", extra },
