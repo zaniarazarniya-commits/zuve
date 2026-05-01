@@ -44,7 +44,7 @@ export default function Home() {
 
         {/* Footer */}
         <p className="text-[11px] text-[#b5a89a] tracking-wide">
-          Strandvägen 1 · 453 30 Lysekil
+          Kungsgatan 36 · 453 33 Lysekil
         </p>
       </div>
     </main>

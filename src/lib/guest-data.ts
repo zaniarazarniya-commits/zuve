@@ -196,7 +196,7 @@ export const restaurants: Restaurant[] = [
     imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop",
     cuisine: "Svenskt · Skaldjur",
     distance: "0 m",
-    phone: "0523-101 20",
+    phone: "0523-61 10 00",
   },
   {
     id: "strandfickan",

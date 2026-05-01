@@ -106,11 +106,11 @@ Welcome to Grand Hotel Lysekil. We are looking forward to your visit.
 See your booking and explore extras and experiences here:
 ${params.url}
 
-If you have any questions, please contact us at 0523-101 20.
+If you have any questions, please contact us at 0523-61 10 00.
 
 Warm welcome,
 Grand Hotel Lysekil
-Strandvägen 1, 453 30 Lysekil
+Kungsgatan 36, 453 33 Lysekil
     `.trim()
     : `
 Hej ${params.firstName}!
@@ -120,11 +120,11 @@ Välkommen till Grand Hotel Lysekil. Vi ser fram emot ditt besök.
 Se din bokning och utforska tillval och upplevelser här:
 ${params.url}
 
-Har du frågor? Kontakta oss på 0523-101 20.
+Har du frågor? Kontakta oss på 0523-61 10 00.
 
 Varmt välkommen,
 Grand Hotel Lysekil
-Strandvägen 1, 453 30 Lysekil
+Kungsgatan 36, 453 33 Lysekil
     `.trim()
 
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
