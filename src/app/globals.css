@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f1ec;
+  --foreground: #1c2e36;
+  --primary: #1a3a4a;
+  --accent: #c9a96e;
+  --sea-deep: #0b3a4e;
+  --sea: #2b7a8a;
+  --sea-light: #7db9c4;
+  --sea-mist: #c8e3e8;
+  --granite: #5a5c5e;
+  --granite-light: #9da0a3;
+  --sand: #d4c8b8;
+  --sand-light: #efe9e0;
+  --white: #ffffff;
+  --warm-white: #f4f1ec;
+  --success: #3d7a5f;
+  --muted: #8a7f72;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-sea-deep: var(--sea-deep);
+  --color-sea: var(--sea);
+  --color-sea-light: var(--sea-light);
+  --color-sea-mist: var(--sea-mist);
+  --color-granite: var(--granite);
+  --color-granite-light: var(--granite-light);
+  --color-sand: var(--sand);
+  --color-sand-light: var(--sand-light);
+  --color-warm-white: var(--warm-white);
+  --color-success: var(--success);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   VÄLKOMST-ANIMATIONER
+   ============================================================ */
+
+@keyframes revealIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes lineReveal {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes revealOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-30px);
+    filter: blur(8px);
+  }
+}
+
+@keyframes contentIn {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-in {
+  animation: revealIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+.line-reveal {
+  animation: lineReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: center;
+  opacity: 0;
+}
+
+.reveal-out {
+  animation: revealOut 0.8s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+.content-in {
+  animation: contentIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
