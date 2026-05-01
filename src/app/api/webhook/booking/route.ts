@@ -76,9 +76,10 @@ function mapStatus(body: SirvoyWebhook): string {
 // POST — anropas av Sirvoy vid ny bokning, ändring eller avbokning.
 // ============================================================
 export async function POST(request: Request) {
+  // Valfri webhook-secret-validering (Sirvoy stöder inte alltid custom headers)
   const webhookSecret = request.headers.get("x-webhook-secret")
   const expectedSecret = process.env.SIRVOY_WEBHOOK_SECRET ?? process.env.WEBHOOK_SECRET
-  if (expectedSecret && webhookSecret !== expectedSecret) {
+  if (expectedSecret && webhookSecret && webhookSecret !== expectedSecret) {
     return NextResponse.json({ error: "Ogiltig webhook-nyckel" }, { status: 401 })
   }
 
