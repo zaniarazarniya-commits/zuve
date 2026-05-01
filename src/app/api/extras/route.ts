@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   const { data: booking, error: bookingError } = await supabase
     .from("bookings")
-    .select("id, guest_first_name, guest_last_name")
+    .select("id, guest_first_name, guest_last_name, sirvoy_booking_id")
     .eq("guest_token", token)
     .single()
 
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     extraTitle: title,
     price,
     currency: currency ?? "SEK",
-    bookingId: booking.id,
+    bookingId: booking.sirvoy_booking_id ?? booking.id,
   }).catch((err) => {
     console.error("[Extras] Kunde inte skicka e-postnotis:", err)
   })

@@ -109,7 +109,7 @@ export async function PATCH(
   // --- Hämta befintlig bokning för att se om telefon saknades ---
   const { data: existing, error: lookupError } = await supabase
     .from("bookings")
-    .select("guest_phone, guest_first_name, guest_last_name")
+    .select("guest_phone, guest_first_name, guest_last_name, sms_sent_at, sirvoy_booking_id")
     .eq("guest_token", token)
     .single()
 
@@ -122,6 +122,7 @@ export async function PATCH(
   }
 
   const hadPhoneBefore = Boolean(existing.guest_phone)
+  const smsAlreadySent = Boolean(existing.sms_sent_at)
 
   // Whitelist
   const allowedFields = ["guest_email", "guest_phone", "eta", "notes"]
@@ -159,6 +160,7 @@ export async function PATCH(
       guest_language,
       total_price_sek,
       currency,
+      sirvoy_booking_id,
       sirvoy_room_name,
       sirvoy_room_type,
       rooms (
@@ -177,17 +179,26 @@ export async function PATCH(
     )
   }
 
-  // --- Skicka SMS om telefon lagts till för första gången ---
+  // --- Skicka SMS om telefon lagts till för första gången OCH inte redan skickat ---
   const hasPhoneNow = Boolean(booking.guest_phone)
-  if (!hadPhoneBefore && hasPhoneNow) {
+  const smsDisabled = process.env.DISABLE_SMS === "true"
+  if (smsDisabled) {
+    console.log("[PATCH] SMS är AVSTÄNGT (DISABLE_SMS=true).")
+  } else if (!hadPhoneBefore && hasPhoneNow && !smsAlreadySent) {
     sendBookingSms({
       guest_first_name: booking.guest_first_name,
       guest_phone: booking.guest_phone,
       guest_token: token,
       guest_language: booking.guest_language,
-    }).catch((err) => {
-      console.error("[PATCH] Kunde inte skicka SMS:", err)
     })
+      .then(async () => {
+        // Markera som skickat
+        await supabase.from("bookings").update({ sms_sent_at: new Date().toISOString() }).eq("id", booking.id)
+        console.log("[PATCH] SMS markerat som skickat")
+      })
+      .catch((err: Error) => {
+        console.error("[PATCH] Kunde inte skicka SMS:", err)
+      })
   }
 
   // --- Skicka admin-notifikation om komplettering ---
@@ -196,7 +207,7 @@ export async function PATCH(
     phone: booking.guest_phone,
     eta: booking.eta,
     notes: booking.notes,
-    bookingId: booking.id,
+    bookingId: booking.sirvoy_booking_id ?? booking.id,
   }).catch((err) => {
     console.error("[PATCH] Kunde inte skicka e-postnotis:", err)
   })

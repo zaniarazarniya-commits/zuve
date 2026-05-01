@@ -18,7 +18,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se"
  * @param subject Ämnesrad
  * @param body    Textinnehåll (plain text)
  */
-export async function sendAdminNotification(subject: string, body: string): Promise<void> {
+export async function sendAdminNotification(subject: string, body: string, html?: string): Promise<void> {
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn("[Email] SMTP-konfiguration saknas — e-post skickas inte.")
     console.warn("[Email] Ämne:", subject)
@@ -41,6 +41,7 @@ export async function sendAdminNotification(subject: string, body: string): Prom
       to: ADMIN_EMAIL,
       subject,
       text: body,
+      html: html ?? body.replace(/\n/g, "<br>"),
     })
 
     console.log("[Email] Skickat:", info.messageId)
@@ -81,7 +82,22 @@ Med vänlig hälsning,
 Grand Hotel Lysekil Gästportal
   `.trim()
 
-  await sendAdminNotification(subject, body)
+  const html = `<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1a1a1a;background:#faf9f6;">
+    <p style="text-align:center;font-size:11px;letter-spacing:0.15em;color:#8c7c6c;text-transform:uppercase;margin-bottom:8px;">Grand Hotel Lysekil</p>
+    <h1 style="font-weight:300;font-size:22px;text-align:center;margin:0 0 24px;">Nytt tillvalsintresse</h1>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <table style="width:100%;font-size:14px;line-height:1.7;">
+      <tr><td style="color:#8c7c6c;width:90px;vertical-align:top;">Gäst</td><td style="font-weight:500;">${params.guestName}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Tillval</td><td>${params.extraTitle}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Pris</td><td>${params.price} ${params.currency}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Bokning</td><td style="font-family:monospace;font-size:12px;">${params.bookingId}</td></tr>
+    </table>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:13px;color:#4a4a4a;margin-bottom:24px;">Åtgärd: Kontakta gästen via receptionen för att bekräfta och boka tillvalet.</p>
+    <p style="font-size:11px;color:#b5a89a;text-align:center;margin-top:32px;">Grand Hotel Lysekil Gästportal</p>
+  </div>`
+
+  await sendAdminNotification(subject, body, html)
 }
 
 /**
@@ -179,5 +195,20 @@ Med vänlig hälsning,
 Grand Hotel Lysekil Gästapp
   `.trim()
 
-  await sendAdminNotification(subject, body)
+  const html = `<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1a1a1a;background:#faf9f6;">
+    <p style="text-align:center;font-size:11px;letter-spacing:0.15em;color:#8c7c6c;text-transform:uppercase;margin-bottom:8px;">Grand Hotel Lysekil</p>
+    <h1 style="font-weight:300;font-size:22px;text-align:center;margin:0 0 24px;">Gäst har kompletterat sina uppgifter</h1>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <table style="width:100%;font-size:14px;line-height:1.7;">
+      <tr><td style="color:#8c7c6c;width:90px;vertical-align:top;">Gäst</td><td style="font-weight:500;">${params.guestName}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Telefon</td><td>${params.phone ?? "(ej angivet)"}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">ETA</td><td>${params.eta ?? "(ej angivet)"}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Bokning</td><td style="font-family:monospace;font-size:12px;">${params.bookingId}</td></tr>
+    </table>
+    ${params.notes ? `<hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;"><p style="font-size:13px;color:#4a4a4a;"><strong>Önskemål:</strong><br>${params.notes.replace(/\n/g, "<br>")}</p>` : ""}
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:11px;color:#b5a89a;text-align:center;margin-top:32px;">Grand Hotel Lysekil Gästportal</p>
+  </div>`
+
+  await sendAdminNotification(subject, body, html)
 }
