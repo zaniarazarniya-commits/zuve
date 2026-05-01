@@ -75,6 +75,23 @@ function mapStatus(body: SirvoyWebhook): string {
 }
 
 // ============================================================
+// Hjälpfunktion: detekterar OTA-proxy-e-post (Expedia, Booking.com, etc.)
+// ============================================================
+function isOtaProxyEmail(email: string): boolean {
+  const lower = email.toLowerCase()
+  return (
+    lower.endsWith("@m.expediapartnercentral.com") ||
+    lower.endsWith("@guest.booking.com") ||
+    lower.endsWith("@reservations.booking.com") ||
+    lower.endsWith("@hotels.com") ||
+    lower.endsWith("@agoda.com") ||
+    lower.endsWith("@partners.airbnb.com") ||
+    lower.endsWith("@trip.com") ||
+    lower.endsWith("@travelport.com")
+  )
+}
+
+// ============================================================
 // POST — anropas av Sirvoy vid ny bokning, ändring eller avbokning.
 // ============================================================
 export async function POST(request: Request) {
@@ -184,8 +201,8 @@ export async function POST(request: Request) {
         console.error("[Webhook] Kunde inte skicka SMS:", err)
       }
     }
-    // 2. Om ingen telefon men e-post finns → skicka välkomstmejl
-    else if (booking.guest_email) {
+    // 2. Om ingen telefon men riktig e-post finns → skicka välkomstmejl
+    else if (booking.guest_email && !isOtaProxyEmail(booking.guest_email)) {
       try {
         await sendGuestWelcomeEmail({
           to: booking.guest_email,
@@ -202,7 +219,11 @@ export async function POST(request: Request) {
         console.error("[Webhook] Kunde inte skicka välkomstmejl:", err)
       }
     }
-    // 3. Ingen kontaktinfo alls
+    // 3. OTA-proxy-e-post (Expedia, Booking.com etc.) → skicka inget
+    else if (booking.guest_email && isOtaProxyEmail(booking.guest_email)) {
+      console.log(`[Webhook] OTA-proxy-e-post upptäckt (${booking.guest_email}) — välkomstmeddelande skickas ej.`)
+    }
+    // 4. Ingen kontaktinfo alls
     else {
       console.log("[Webhook] Ingen telefon eller e-post — välkomstmeddelande ej skickat.")
     }
