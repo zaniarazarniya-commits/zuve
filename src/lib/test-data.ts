@@ -10,12 +10,12 @@ export const testBooking: Booking = {
   number_of_guests: 2,
   eta: "",
   status: "confirmed",
+  cancelled: false,
   notes: "",
   total_price_sek: 2640,
   currency: "SEK",
   sirvoy_room_name: "201",
   sirvoy_room_type: "Deluxe",
-  is_paid: false,
   rooms: {
     room_number: "201",
     room_type: "Deluxe",
