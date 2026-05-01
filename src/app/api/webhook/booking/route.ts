@@ -46,6 +46,7 @@ interface SirvoyWebhook {
   event: "new" | "modified" | "deleted"
   propertyId: number
   bookingId: number
+  bookingDate: string
   arrivalDate: string
   departureDate: string
   cancelled: boolean
@@ -157,11 +158,16 @@ export async function POST(request: Request) {
 
   const booking = data?.[0]
 
-  // --- Skicka välkomstmeddelande ENDAST vid nya bokningar och ENDAST om inte redan skickat ---
+  // --- Skicka välkomstmeddelande ENDAST vid nya bokningar ---
+  // ENDAST för bokningar från och med 2026-05-01 (inte äldre bokningar som redan finns i systemet)
+  const bookingDate = body.bookingDate ? new Date(body.bookingDate) : null
+  const cutoffDate = new Date("2026-05-01T00:00:00Z")
+  const isNewBooking = bookingDate && bookingDate >= cutoffDate
+
   const smsDisabled = process.env.DISABLE_SMS === "true"
   if (smsDisabled) {
     console.log("[Webhook] SMS är AVSTÄNGT (DISABLE_SMS=true). Inget välkomstmeddelande skickat.")
-  } else if (booking && body.event === "new" && !booking.sms_sent_at) {
+  } else if (booking && body.event === "new" && !booking.sms_sent_at && isNewBooking) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysekil.se"
     const guestUrl = `${appUrl}/guest/${booking.guest_token}`
 
@@ -200,6 +206,8 @@ export async function POST(request: Request) {
     else {
       console.log("[Webhook] Ingen telefon eller e-post — välkomstmeddelande ej skickat.")
     }
+  } else if (booking && body.event === "new" && !isNewBooking) {
+    console.log(`[Webhook] Bokningen är från ${body.bookingDate} — äldre än 2026-05-01. Välkomstmeddelande skickas ej.`)
   } else if (booking) {
     console.log(`[Webhook] Event är "${body.event}" eller välkomst redan skickat.`)
   }
