@@ -871,6 +871,7 @@ export default function GuestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+  const [activeItem, setActiveItem] = useState<typeof upsells[0] | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -904,8 +905,6 @@ export default function GuestPage() {
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
   if (!booking) return <ErrorScreen message="Bokningen hittades inte. Länken kan vara felaktig eller utgången." />;
-
-  const [activeItem, setActiveItem] = useState<typeof upsells[0] | null>(null);
 
   return (
     <UpsellModalContext.Provider value={{ activeItem, setActiveItem }}>
