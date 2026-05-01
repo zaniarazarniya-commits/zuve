@@ -159,7 +159,6 @@ export async function PATCH(
       currency,
       sirvoy_room_name,
       sirvoy_room_type,
-      is_paid,
       rooms (
         room_number,
         room_type,
