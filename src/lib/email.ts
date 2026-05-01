@@ -85,6 +85,75 @@ Grand Hotel Lysekil Gästportal
 }
 
 /**
+ * Skicka välkomstmejl till gästen (om de ej har telefonnummer).
+ */
+export async function sendGuestWelcomeEmail(params: {
+  to: string
+  firstName: string
+  url: string
+  language?: string | null
+}): Promise<void> {
+  const subject = params.language === "en"
+    ? `Welcome to Grand Hotel Lysekil, ${params.firstName}!`
+    : `Välkommen till Grand Hotel Lysekil, ${params.firstName}!`
+
+  const body = params.language === "en"
+    ? `
+Hi ${params.firstName}!
+
+Welcome to Grand Hotel Lysekil. We are looking forward to your visit.
+
+See your booking and explore extras and experiences here:
+${params.url}
+
+If you have any questions, please contact us at 0523-101 20.
+
+Warm welcome,
+Grand Hotel Lysekil
+Strandvägen 1, 453 30 Lysekil
+    `.trim()
+    : `
+Hej ${params.firstName}!
+
+Välkommen till Grand Hotel Lysekil. Vi ser fram emot ditt besök.
+
+Se din bokning och utforska tillval och upplevelser här:
+${params.url}
+
+Har du frågor? Kontakta oss på 0523-101 20.
+
+Varmt välkommen,
+Grand Hotel Lysekil
+Strandvägen 1, 453 30 Lysekil
+    `.trim()
+
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.warn("[Email] SMTP saknas — välkomstmejl skickas inte.")
+    return
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  })
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Grand Hotel Lysekil" <${SMTP_USER}>`,
+      to: params.to,
+      subject,
+      text: body,
+    })
+    console.log("[Email] Välkomstmejl skickat:", info.messageId)
+  } catch (err) {
+    console.error("[Email] Kunde inte skicka välkomstmejl:", err)
+    throw err
+  }
+}
+
+/**
  * Notifikation: gäst har kompletterat sina uppgifter.
  */
 export async function sendGuestUpdatedNotification(params: {

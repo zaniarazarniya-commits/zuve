@@ -9,6 +9,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { sendBookingSms } from "@/lib/sms"
+import { sendGuestWelcomeEmail } from "@/lib/email"
 
 function getSupabase() {
   return createClient(
@@ -147,7 +148,7 @@ export async function POST(request: Request) {
       },
       { onConflict: "external_booking_id" }
     )
-    .select("id, guest_first_name, guest_phone, guest_token, guest_language, sms_sent_at")
+    .select("id, guest_first_name, guest_email, guest_phone, guest_token, guest_language, sms_sent_at")
 
   if (error) {
     console.error("Supabase-fel:", error)
@@ -156,27 +157,48 @@ export async function POST(request: Request) {
 
   const booking = data?.[0]
 
-  // --- Skicka SMS ENDAST vid nya bokningar och ENDAST om nummer finns och ENDAST om inte redan skickat ---
-  if (booking && body.event === "new") {
-    if (!booking.sms_sent_at && booking.guest_phone) {
+  // --- Skicka välkomstmeddelande ENDAST vid nya bokningar och ENDAST om inte redan skickat ---
+  if (booking && body.event === "new" && !booking.sms_sent_at) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysekil.se"
+    const guestUrl = `${appUrl}/guest/${booking.guest_token}`
+
+    // 1. Försök SMS först
+    if (booking.guest_phone) {
       try {
         await sendBookingSms(booking)
-        // Markera att SMS är skickat
         await supabase
           .from("bookings")
           .update({ sms_sent_at: new Date().toISOString() })
           .eq("id", booking.id)
-        console.log("[Webhook] SMS skickat och markerat för bokning:", booking.id)
+        console.log("[Webhook] SMS skickat för bokning:", booking.id)
       } catch (err) {
         console.error("[Webhook] Kunde inte skicka SMS:", err)
       }
-    } else if (booking.sms_sent_at) {
-      console.log("[Webhook] SMS redan skickat tidigare — skickar inte igen.")
-    } else {
-      console.log("[Webhook] Inget telefonnummer — SMS ej skickat.")
+    }
+    // 2. Om ingen telefon men e-post finns → skicka välkomstmejl
+    else if (booking.guest_email) {
+      try {
+        await sendGuestWelcomeEmail({
+          to: booking.guest_email,
+          firstName: booking.guest_first_name,
+          url: guestUrl,
+          language: booking.guest_language,
+        })
+        await supabase
+          .from("bookings")
+          .update({ sms_sent_at: new Date().toISOString() })
+          .eq("id", booking.id)
+        console.log("[Webhook] Välkomstmejl skickat för bokning:", booking.id)
+      } catch (err) {
+        console.error("[Webhook] Kunde inte skicka välkomstmejl:", err)
+      }
+    }
+    // 3. Ingen kontaktinfo alls
+    else {
+      console.log("[Webhook] Ingen telefon eller e-post — välkomstmeddelande ej skickat.")
     }
   } else if (booking) {
-    console.log(`[Webhook] Event är "${body.event}" — skickar inget SMS (endast vid "new").`)
+    console.log(`[Webhook] Event är "${body.event}" eller välkomst redan skickat.`)
   }
 
   return NextResponse.json(
