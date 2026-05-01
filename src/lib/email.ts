@@ -19,6 +19,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se"
  * @param body    Textinnehåll (plain text)
  */
 export async function sendAdminNotification(subject: string, body: string, html?: string): Promise<void> {
+  console.log("[Email] sendAdminNotification anropad:", { subject, to: ADMIN_EMAIL, hasSmtp: !!SMTP_HOST })
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn("[Email] SMTP-konfiguration saknas — e-post skickas inte.")
     console.warn("[Email] Ämne:", subject)
@@ -204,6 +205,7 @@ export async function sendGuestUpdatedNotification(params: {
   notes?: string | null
   bookingId: string
 }): Promise<void> {
+  console.log("[Email] sendGuestUpdatedNotification anropad:", params)
   const subject = `Komplettering mottagen — ${params.guestName}`
   const body = `
 Hej,
