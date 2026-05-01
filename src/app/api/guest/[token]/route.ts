@@ -109,7 +109,7 @@ export async function PATCH(
   // --- Hämta befintlig bokning för att se om telefon saknades ---
   const { data: existing, error: lookupError } = await supabase
     .from("bookings")
-    .select("guest_phone, guest_first_name, guest_last_name, sms_completion_sent_at, sirvoy_booking_id")
+    .select("guest_phone, guest_first_name, guest_last_name, sirvoy_booking_id")
     .eq("guest_token", token)
     .single()
 
@@ -122,7 +122,22 @@ export async function PATCH(
   }
 
   const hadPhoneBefore = Boolean(existing.guest_phone)
-  const completionSmsAlreadySent = Boolean(existing.sms_completion_sent_at)
+
+  // Kolla om sms_completion_sent_at finns (kan saknas tills migration körts)
+  let completionSmsAlreadySent = false
+  try {
+    const { data: smsCheck } = await supabase
+      .from("bookings")
+      .select("sms_completion_sent_at")
+      .eq("guest_token", token)
+      .single()
+    if (smsCheck) {
+      completionSmsAlreadySent = Boolean((smsCheck as Record<string, unknown>).sms_completion_sent_at)
+    }
+  } catch {
+    // Kolumnen finns inte ännu — behandla som ej skickat
+    completionSmsAlreadySent = false
+  }
 
   // Whitelist
   const allowedFields = ["guest_email", "guest_phone", "eta", "notes"]
@@ -196,11 +211,15 @@ export async function PATCH(
         guest_language: booking.guest_language,
       })
       // Markera att completion-SMS skickats så det inte skickas igen
-      await supabase
-        .from("bookings")
-        .update({ sms_completion_sent_at: new Date().toISOString() })
-        .eq("id", booking.id)
-      console.log("[PATCH] Completion-SMS skickat och markerat")
+      try {
+        await supabase
+          .from("bookings")
+          .update({ sms_completion_sent_at: new Date().toISOString() })
+          .eq("id", booking.id)
+        console.log("[PATCH] Completion-SMS skickat och markerat")
+      } catch {
+        console.log("[PATCH] Kunde inte markera sms_completion_sent_at (kolumn saknas?) — SMS skickades dock.")
+      }
     } catch (err) {
       console.error("[PATCH] Kunde inte skicka SMS:", err)
     }
