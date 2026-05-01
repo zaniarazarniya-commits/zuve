@@ -47,10 +47,12 @@ export async function GET(
       number_of_guests,
       eta,
       status,
+      cancelled,
       notes,
       guest_language,
       total_price_sek,
       currency,
+      sirvoy_booking_id,
       sirvoy_room_name,
       sirvoy_room_type,
       rooms (

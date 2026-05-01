@@ -1,6 +1,10 @@
 -- ============================================================
--- SUPABASE MIGRATION: Lägg till SMS-spårning och is_paid
+-- SUPABASE MIGRATION: Lägg till SMS-spårning, bokningsnummer, is_paid
 -- ============================================================
+
+-- Lägg till sirvoy_booking_id för att visa bokningsnummer
+ALTER TABLE bookings
+ADD COLUMN IF NOT EXISTS sirvoy_booking_id TEXT;
 
 -- Lägg till sms_sent_at för att undvika dubbla SMS
 ALTER TABLE bookings

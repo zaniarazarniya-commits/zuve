@@ -120,6 +120,7 @@ export async function POST(request: Request) {
     .upsert(
       {
         external_booking_id: String(body.bookingId),
+        sirvoy_booking_id: String(body.bookingId),
         sirvoy_property_id: String(body.propertyId),
 
         guest_first_name: body.guest.firstName,

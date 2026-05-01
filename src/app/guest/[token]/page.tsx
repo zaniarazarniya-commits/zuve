@@ -697,9 +697,25 @@ function MainScreen({
 
 function BookingOverviewCard({ booking }: { booking: Booking }) {
   const nights = nightsBetween(booking.check_in_date, booking.check_out_date);
+  const isCancelled = booking.cancelled;
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm space-y-5">
+      {/* Avbokningsvarning */}
+      {isCancelled && (
+        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 font-medium text-center">
+          Denna bokning är avbokad
+        </div>
+      )}
+
+      {/* Bokningsnummer */}
+      {booking.sirvoy_booking_id && (
+        <div className="text-center">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-granite">Bokningsnummer</p>
+          <p className="text-sm font-semibold text-foreground">#{booking.sirvoy_booking_id}</p>
+        </div>
+      )}
+
       {/* Datumrad */}
       <div className="flex items-stretch gap-3">
         <div className="flex-1">

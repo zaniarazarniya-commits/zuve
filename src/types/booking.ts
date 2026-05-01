@@ -14,13 +14,14 @@ export interface Booking {
   number_of_guests: number;
   eta: string;
   status: string;
+  cancelled: boolean;
   notes: string;
   total_price_sek: number;
   currency: string;
   sirvoy_room_name: string;
   sirvoy_room_type: string;
+  sirvoy_booking_id?: string;
   rooms: Room;
-  is_paid?: boolean;
 }
 
 export interface ApiResponse {
