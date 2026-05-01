@@ -1,38 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zuve — Grand Hotel Lysekil Gästportal
 
-## Getting Started
+En personlig gästportal för Grand Hotel Lysekil. Gäster får ett SMS med en unik länk där de kan se sin bokning, lägga till tillval och upptäcka det bästa av Lysekil.
 
-First, run the development server:
+## Teknikstack
+
+- **Next.js 16** (App Router)
+- **Tailwind CSS v4**
+- **TypeScript**
+- **Supabase** (PostgreSQL + Row Level Security)
+- **46elks** (SMS-utskick)
+- **Nodemailer** (e-postnotifikationer)
+- **Sirvoy** (bokningssystem via webhook)
+
+## Miljövariabler
+
+Kopiera `.env.example` till `.env.local` och fyll i:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://ditt-projekt.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Sirvoy Webhook
+SIRVOY_WEBHOOK_SECRET=valfri-hemlig-nyckel
+
+# 46elks SMS
+ELKS_API_USERNAME=u...
+ELKS_API_PASSWORD=...
+ELKS_FROM_NUMBER=GrandHotel
+
+# E-post (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=info@grandhotellysekil.se
+SMTP_PASS=...
+ADMIN_EMAIL=info@grandhotellysekil.se
+
+# App
+NEXT_PUBLIC_APP_URL=https://gast.grandhotellysekil.se
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment till Vercel
 
-## Learn More
+1. **Anslut GitHub-repot** i Vercel-dashboarden
+2. **Lägg till domän**: `gast.grandhotellysekil.se`
+3. **Sätt miljövariabler** i Vercel → Settings → Environment Variables
+4. **Konfigurera DNS** hos Webbhotellsleverantören (CNAME → cname.vercel-dns.com)
 
-To learn more about Next.js, take a look at the following resources:
+## Sirvoy Webhook-konfiguration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+I Sirvoy, gå till **Settings → Integrations → Webhooks**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **URL**: `https://gast.grandhotellysekil.se/api/webhook/booking`
+- **Händelser**: Booking created, Booking modified
+- **Secret header**: `x-webhook-secret` med samma värde som `SIRVOY_WEBHOOK_SECRET`
 
-## Deploy on Vercel
+## Gästflöde
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Gäst bokar rum i Sirvoy
+2. Webhook skickar bokning till Zuve
+3. Zuve sparar bokningen och genererar en unik token
+4. SMS skickas till gästen med länk: `https://gast.grandhotellysekil.se/guest/<token>`
+5. Gästen besöker sin personliga sida och kan:
+   - Se bokningsdetaljer
+   - Fyll i ankomsttid och önskemål
+   - Lägga till tillval (frukost, blommor, etc.)
+   - Utforska aktiviteter och restauranger i Lysekil
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-"# zuve" 
-"# zuve" 
+## Redigera innehåll
+
+Allt redigerbart innehåll (tillval, aktiviteter, restauranger) finns i:
+
+```
+src/lib/guest-data.ts
+```
+
+## Databas
+
+Supabase-migration finns i:
+
+```
+supabase/migrations/001_init.sql
+```
+
+## Projektstruktur
+
+```
+src/
+  app/
+    page.tsx              # Landningssida
+    guest/[token]/        # Gästens personliga sida
+    api/
+      webhook/booking/    # Sirvoy-webhook
+      guest/[token]/      # Hämta/uppdatera gästdata
+      extras/             # Spara tillval
+  components/             # React-komponenter
+  lib/
+    guest-data.ts         # Redigerbart innehåll
+    sms.ts                # 46elks-integration
+    email.ts              # SMTP-integration
+  types/
+    booking.ts            # TypeScript-typer
+```
+
+---
+
+Grand Hotel Lysekil · Strandvägen 1 · 453 30 Lysekil

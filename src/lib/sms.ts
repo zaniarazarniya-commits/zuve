@@ -8,7 +8,7 @@
 const ELKS_API_USERNAME = process.env.ELKS_API_USERNAME
 const ELKS_API_PASSWORD = process.env.ELKS_API_PASSWORD
 const FROM_NUMBER = process.env.ELKS_FROM_NUMBER ?? "GrandHotel"
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://grandhotellysekil.se"
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysekil.se"
 
 /**
  * Skicka ett SMS via 46elks.

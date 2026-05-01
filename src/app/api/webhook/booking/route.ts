@@ -77,7 +77,8 @@ function mapStatus(body: SirvoyWebhook): string {
 // ============================================================
 export async function POST(request: Request) {
   const webhookSecret = request.headers.get("x-webhook-secret")
-  if (webhookSecret !== process.env.WEBHOOK_SECRET) {
+  const expectedSecret = process.env.SIRVOY_WEBHOOK_SECRET ?? process.env.WEBHOOK_SECRET
+  if (expectedSecret && webhookSecret !== expectedSecret) {
     return NextResponse.json({ error: "Ogiltig webhook-nyckel" }, { status: 401 })
   }
 
