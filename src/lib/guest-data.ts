@@ -41,7 +41,7 @@ export const upsells: UpsellItem[] = [
     description: "2 miniflaskor mousserande och något sött väntar på rummet.",
     price: 395,
     currency: "kr",
-    imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&h=400&fit=crop",
+    imageUrl: "/Tillval/minitreat.png",
     tag: "Populär",
   },
   {
@@ -50,7 +50,7 @@ export const upsells: UpsellItem[] = [
     description: "Iskall cava & choklad väntar på rummet.",
     price: 549,
     currency: "kr",
-    imageUrl: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&h=400&fit=crop",
+    imageUrl: "/Tillval/BubbelCava.png",
   },
   {
     id: "bubbel-champagne",
@@ -58,7 +58,7 @@ export const upsells: UpsellItem[] = [
     description: "Iskall champagne & choklad väntar på rummet.",
     price: 1595,
     currency: "kr",
-    imageUrl: "https://images.unsplash.com/photo-1594146865716-016d5b9465d5?w=600&h=400&fit=crop",
+    imageUrl: "/Tillval/Bubbel%20Champange.png",
     tag: "Lyxa till det",
   },
   {
@@ -67,7 +67,7 @@ export const upsells: UpsellItem[] = [
     description: "En god flaska Rioja med blandade tapas & delikatesser från Luna Vingård & Restaurang. Kan avnjutas på hotellet i ert rum, i Grands Bibliotek eller som picknick att ta med. Förbokas minst 2 dagar före ankomst.",
     price: 1195,
     currency: "kr",
-    imageUrl: "https://images.unsplash.com/photo-1550966871-3ed3c47e2ce2?w=600&h=400&fit=crop",
+    imageUrl: "/Tillval/tapas.png",
     tag: "För 2 personer",
   },
   {
@@ -76,7 +76,7 @@ export const upsells: UpsellItem[] = [
     description: "Färska räkor, kräftor & bubbel för två personer. Förbokas minst 5 dagar före ankomst. (Dagspris juni–september, se lågsäsongspris nedan.)",
     price: 1590,
     currency: "kr",
-    imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop",
+    imageUrl: "/Tillval/Skaldjurbubbel.png",
     tag: "Lågsäsong",
   },
   {
