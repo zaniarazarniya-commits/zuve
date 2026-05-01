@@ -79,8 +79,8 @@ export async function sendBookingSms(booking: {
 
   const message =
     booking.guest_language === "en"
-      ? `Hi ${name}! Welcome to Grand Hotel Lysekil. See your booking and extras here: ${url}`
-      : `Hej ${name}! Välkommen till Grand Hotel Lysekil. Se din bokning och tillval här: ${url}`
+      ? `Hi ${name}! Your booking at Grand Hotel Lysekil: ${url}`
+      : `Hej ${name}! Din bokning på Grand Hotel Lysekil: ${url}`
 
   await sendSms(booking.guest_phone, message)
 }
@@ -104,8 +104,8 @@ export async function sendCompletionSms(booking: {
 
   const message =
     booking.guest_language === "en"
-      ? `Thank you ${name}! Here is your mobile link to Grand Hotel Lysekil: ${url}`
-      : `Tack ${name}! Här kommer din mobillänk till Grand Hotel Lysekil: ${url}`
+      ? `Thanks ${name}! Your mobile link: ${url}`
+      : `Tack ${name}! Din mobillänk: ${url}`
 
   await sendSms(booking.guest_phone, message)
 }

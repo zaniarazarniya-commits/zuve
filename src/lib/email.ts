@@ -143,6 +143,30 @@ Grand Hotel Lysekil
 Kungsgatan 36, 453 33 Lysekil
     `.trim()
 
+  const html = `<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1a1a1a;background:#faf9f6;">
+    <p style="text-align:center;font-size:11px;letter-spacing:0.15em;color:#8c7c6c;text-transform:uppercase;margin-bottom:8px;">Grand Hotel Lysekil</p>
+    <h1 style="font-weight:300;font-size:22px;text-align:center;margin:0 0 24px;">${params.language === "en" ? "Welcome" : "Välkommen"}</h1>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:14px;line-height:1.7;color:#4a4a4a;margin-bottom:24px;">
+      ${params.language === "en"
+        ? `Hi ${params.firstName}! We are looking forward to your visit.`
+        : `Hej ${params.firstName}! Vi ser fram emot ditt besök.`}
+    </p>
+    <p style="font-size:14px;line-height:1.7;color:#4a4a4a;margin-bottom:24px;">
+      ${params.language === "en"
+        ? `See your booking and explore extras here:`
+        : `Se din bokning och utforska tillval här:`}
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${params.url}" style="display:inline-block;padding:14px 28px;background:#1a3a4a;color:#fff;text-decoration:none;border-radius:12px;font-size:14px;font-weight:500;">${params.language === "en" ? "Open Guest Portal" : "Öppna gästportal"}</a>
+    </div>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:12px;color:#8c7c6c;text-align:center;">
+      ${params.language === "en" ? "Questions? Call us at" : "Frågor? Ring oss på"} 0523-101 20
+    </p>
+    <p style="font-size:11px;color:#b5a89a;text-align:center;margin-top:16px;">Kungsgatan 36 · 453 33 Lysekil</p>
+  </div>`
+
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn("[Email] SMTP saknas — välkomstmejl skickas inte.")
     return
@@ -161,6 +185,7 @@ Kungsgatan 36, 453 33 Lysekil
       to: params.to,
       subject,
       text: body,
+      html,
     })
     console.log("[Email] Välkomstmejl skickat:", info.messageId)
   } catch (err) {

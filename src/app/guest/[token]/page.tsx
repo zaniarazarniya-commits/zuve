@@ -49,10 +49,7 @@ function WelcomeScreen({
 }) {
   const [isExiting, setIsExiting] = useState(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => handleContinue(), 5000);
-    return () => clearTimeout(t);
-  }, []);
+  // Gästen måste själv klicka "Fortsätt" — inget auto-navigate
 
   function handleContinue() {
     setIsExiting(true);
@@ -417,10 +414,33 @@ function ExperienceCard({
   tag?: string;
   rightElement?: React.ReactNode;
 }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className="rounded-2xl bg-white shadow-sm overflow-hidden">
       <div className="relative h-44 overflow-hidden bg-sand-light">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${imageUrl})` }} />
+        {/* Skeleton loader */}
+        {!imgLoaded && !imgError && (
+          <div className="absolute inset-0 bg-sand-light animate-pulse" />
+        )}
+        {/* Image with fallback */}
+        {!imgError ? (
+          <img
+            src={imageUrl}
+            alt={title}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-sand-light flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-10 h-10 text-sand">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         {tag && (
           <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-[10px] font-medium text-primary uppercase tracking-wider">
@@ -445,6 +465,7 @@ function ExperienceCard({
 function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] }) {
   const { setActiveItem } = useContext(UpsellModalContext);
   const [added, setAdded] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   async function handleConfirm() {
     try {
@@ -466,6 +487,8 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
       }
       setAdded(true);
       setActiveItem(null);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Kunde inte skicka intresseanmälan");
     }
@@ -497,6 +520,16 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
 
       {/* Bekräftelsemodal — renderas globalt men knapparna finns här */}
       <UpsellModal token={token} item={item} onConfirm={handleConfirm} />
+
+      {/* Toast feedback efter bekräftelse */}
+      {showSuccess && (
+        <div className="fixed top-4 left-4 right-4 z-[70] flex justify-center animate-fade-in">
+          <div className="bg-success text-white px-5 py-3 rounded-2xl shadow-lg text-sm font-medium flex items-center gap-2">
+            <CheckIcon className="w-4 h-4" />
+            Intresseanmälan skickad till receptionen
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -803,8 +836,14 @@ function BookingOverviewCard({ booking }: { booking: Booking }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-wider text-granite mb-1">Rum</p>
-          <p className="text-sm font-semibold text-foreground">{booking.sirvoy_room_name}</p>
-          <p className="text-xs text-granite-light">{booking.sirvoy_room_type}</p>
+          {booking.sirvoy_room_name ? (
+            <>
+              <p className="text-sm font-semibold text-foreground">{booking.sirvoy_room_name}</p>
+              <p className="text-xs text-granite-light">{booking.sirvoy_room_type}</p>
+            </>
+          ) : (
+            <p className="text-sm text-granite-light italic">Rum tilldelas vid incheckning</p>
+          )}
         </div>
         <div>
           <p className="text-[10px] font-medium uppercase tracking-wider text-granite mb-1">Gäster</p>
@@ -880,6 +919,15 @@ export default function GuestPage() {
   const [error, setError] = useState("");
   const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [activeItem, setActiveItem] = useState<typeof upsells[0] | null>(null);
+
+  // Dynamisk page title
+  useEffect(() => {
+    if (booking) {
+      document.title = `${booking.guest_first_name} — Grand Hotel Lysekil`;
+    } else {
+      document.title = "Grand Hotel Lysekil — Din vistelse";
+    }
+  }, [booking]);
 
   useEffect(() => {
     if (!token) {
