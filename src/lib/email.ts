@@ -64,21 +64,21 @@ export async function sendExtraAddedNotification(params: {
   currency: string
   bookingId: string
 }): Promise<void> {
-  const subject = `Nytt tillval: ${params.extraTitle} — ${params.guestName}`
+  const subject = `Tillvalsintresse: ${params.extraTitle} — ${params.guestName}`
   const body = `
 Hej,
 
-En gäst har lagt till ett tillval:
+En gäst har visat intresse för ett tillval via gästportalen:
 
 Gäst:      ${params.guestName}
 Tillval:   ${params.extraTitle}
 Pris:      ${params.price} ${params.currency}
 Bokning:   ${params.bookingId}
 
-Logga in i adminpanelen för att se detaljer.
+Åtgärd: Kontakta gästen via receptionen för att bekräfta och boka tillvalet.
 
 Med vänlig hälsning,
-Grand Hotel Lysekil Gästapp
+Grand Hotel Lysekil Gästportal
   `.trim()
 
   await sendAdminNotification(subject, body)

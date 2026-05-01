@@ -437,15 +437,11 @@ function ExperienceCard({
 }
 
 function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const [added, setAdded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  async function handleToggle() {
-    if (added) {
-      setAdded(false);
-      return;
-    }
-
+  async function handleConfirm() {
     setIsAdding(true);
     try {
       const res = await fetch("/api/extras", {
@@ -462,42 +458,72 @@ function UpsellCard({ token, item }: { token: string; item: typeof upsells[0] })
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Kunde inte lägga till tillval");
+        throw new Error(data.error || "Kunde inte skicka intresseanmälan");
       }
       setAdded(true);
+      setShowConfirm(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Kunde inte spara tillval");
+      alert(err instanceof Error ? err.message : "Kunde inte skicka intresseanmälan");
     } finally {
       setIsAdding(false);
     }
   }
 
   return (
-    <ExperienceCard
-      imageUrl={item.imageUrl}
-      title={item.title}
-      description={item.description}
-      tag={item.tag}
-      rightElement={
-        <button
-          onClick={handleToggle}
-          disabled={isAdding}
-          className={`relative px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-500 active:scale-95 min-w-[110px] ${
-            added ? "bg-success text-white" : "bg-primary text-white hover:bg-sea-deep"
-          } disabled:opacity-50`}
-        >
-          <span className={`flex items-center justify-center transition-all duration-500 ${added ? "opacity-0" : "opacity-100"}`}>
-            {isAdding ? "..." : `${item.price} ${item.currency}`}
-          </span>
-          {added && (
-            <span className="absolute inset-0 flex items-center justify-center gap-1.5">
+    <>
+      <ExperienceCard
+        imageUrl={item.imageUrl}
+        title={item.title}
+        description={item.description}
+        tag={item.tag}
+        rightElement={
+          added ? (
+            <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium bg-success text-white">
               <CheckIcon className="w-4 h-4" />
-              Tillagd
+              Intresseanmäld
             </span>
-          )}
-        </button>
-      }
-    />
+          ) : (
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={isAdding}
+              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 active:scale-95 disabled:opacity-50"
+            >
+              {item.price} {item.currency}
+            </button>
+          )
+        }
+      />
+
+      {/* Bekräftelsemodal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+              <p className="text-sm text-granite font-light">
+                Önskar du beställa detta hos receptionen?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3.5 rounded-2xl text-sm font-medium text-granite bg-sand-light/30 hover:bg-sand-light/50 transition-all duration-500"
+              >
+                Nej, tack
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={isAdding}
+                className="flex-1 py-3.5 rounded-2xl text-sm font-medium bg-primary text-white hover:bg-sea-deep transition-all duration-500 disabled:opacity-50"
+              >
+                {isAdding ? "Skickar..." : "Ja, tack"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -619,9 +645,11 @@ type MainView = "booking" | "explore";
 function MainScreen({
   token,
   booking,
+  onEdit,
 }: {
   token: string;
   booking: Booking;
+  onEdit: () => void;
 }) {
   const [activeView, setActiveView] = useState<MainView>("booking");
 
@@ -645,14 +673,12 @@ function MainScreen({
             <BookingOverviewCard booking={booking} />
 
             {/* Redigera-knapp */}
-            {(!booking.eta) && (
-              <button
-                onClick={() => {/* TODO: öppna modal eller navigera till formulär */}}
-                className="w-full py-4 rounded-2xl bg-white border border-sand text-primary text-sm font-medium transition-all duration-500 hover:bg-sand-light/30"
-              >
-                Komplettera din ankomst
-              </button>
-            )}
+            <button
+              onClick={onEdit}
+              className="w-full py-4 rounded-2xl bg-white border border-sand text-primary text-sm font-medium transition-all duration-500 hover:bg-sand-light/30"
+            >
+              {booking.eta ? "Redigera dina uppgifter" : "Komplettera din ankomst"}
+            </button>
           </div>
         )}
 
@@ -856,7 +882,7 @@ export default function GuestPage() {
 
   return (
     <main className="min-h-full bg-background relative">
-      {step >= 2 && <MainScreen token={token!} booking={booking} />}
+      {step >= 2 && <MainScreen token={token!} booking={booking} onEdit={() => setStep(1)} />}
       {step >= 1 && step < 2 && (
         <DetailsFormScreen
           token={token!}
