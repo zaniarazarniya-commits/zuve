@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   room_id               UUID REFERENCES rooms(id) ON DELETE SET NULL,
 
   guest_token           UUID DEFAULT gen_random_uuid() UNIQUE,
+  sms_sent_at           TIMESTAMPTZ,
 
   created_at            TIMESTAMPTZ DEFAULT NOW(),
   updated_at            TIMESTAMPTZ DEFAULT NOW()

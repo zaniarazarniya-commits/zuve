@@ -146,7 +146,7 @@ export async function POST(request: Request) {
       },
       { onConflict: "external_booking_id" }
     )
-    .select("id, guest_first_name, guest_phone, guest_token, guest_language")
+    .select("id, guest_first_name, guest_phone, guest_token, guest_language, sms_sent_at")
 
   if (error) {
     console.error("Supabase-fel:", error)
@@ -155,17 +155,28 @@ export async function POST(request: Request) {
 
   const booking = data?.[0]
 
-  // --- SMS tillfälligt avstängt medan vi felsöker gästsidan ---
-  console.log("[Webhook] SMS är tillfälligt avstängt.")
-  // if (booking) {
-  //   if (booking.guest_phone) {
-  //     sendBookingSms(booking).catch((err) => {
-  //       console.error("[Webhook] Kunde inte skicka SMS:", err)
-  //     })
-  //   } else {
-  //     console.log("[Webhook] Inget telefonnummer — SMS ej skickat.")
-  //   }
-  // }
+  // --- Skicka SMS ENDAST vid nya bokningar och ENDAST om nummer finns och ENDAST om inte redan skickat ---
+  if (booking && body.event === "new") {
+    if (!booking.sms_sent_at && booking.guest_phone) {
+      try {
+        await sendBookingSms(booking)
+        // Markera att SMS är skickat
+        await supabase
+          .from("bookings")
+          .update({ sms_sent_at: new Date().toISOString() })
+          .eq("id", booking.id)
+        console.log("[Webhook] SMS skickat och markerat för bokning:", booking.id)
+      } catch (err) {
+        console.error("[Webhook] Kunde inte skicka SMS:", err)
+      }
+    } else if (booking.sms_sent_at) {
+      console.log("[Webhook] SMS redan skickat tidigare — skickar inte igen.")
+    } else {
+      console.log("[Webhook] Inget telefonnummer — SMS ej skickat.")
+    }
+  } else if (booking) {
+    console.log(`[Webhook] Event är "${body.event}" — skickar inget SMS (endast vid "new").`)
+  }
 
   return NextResponse.json(
     { message: "Bokning mottagen och sparad!", booking },
