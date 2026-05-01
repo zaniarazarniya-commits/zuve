@@ -514,6 +514,12 @@ function UpsellModal({
   const isOpen = activeItem?.id === item.id;
   const [isAdding, setIsAdding] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   async function handleClick() {
@@ -523,9 +529,10 @@ function UpsellModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5 my-auto">
-        <div className="text-center space-y-2">
+    <div className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm animate-fade-in">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 w-full max-w-sm">
+        <div className="bg-white rounded-3xl p-6 shadow-xl space-y-5">
+          <div className="text-center space-y-2">
           <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
           <p className="text-sm text-granite font-light">
             Önskar du beställa detta hos receptionen?
@@ -546,6 +553,7 @@ function UpsellModal({
           >
             {isAdding ? "Skickar..." : "Ja, tack"}
           </button>
+        </div>
         </div>
       </div>
     </div>
