@@ -8,7 +8,7 @@
 import nodemailer from "nodemailer"
 
 const SMTP_HOST = process.env.SMTP_HOST
-const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587)
+const SMTP_PORT = Number(process.env.SMTP_PORT ?? 465)
 const SMTP_USER = process.env.SMTP_USER
 const SMTP_PASS = process.env.SMTP_PASS
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se"
