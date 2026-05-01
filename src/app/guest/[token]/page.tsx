@@ -523,8 +523,8 @@ function UpsellModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5 bg-black/30 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl space-y-5 my-auto">
         <div className="text-center space-y-2">
           <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
           <p className="text-sm text-granite font-light">

@@ -86,6 +86,31 @@ export async function sendBookingSms(booking: {
 }
 
 /**
+ * Skicka SMS när gästen kompletterat med telefonnummer (fick länk via e-post).
+ */
+export async function sendCompletionSms(booking: {
+  guest_first_name: string
+  guest_phone: string | null
+  guest_token: string
+  guest_language?: string | null
+}): Promise<void> {
+  if (!booking.guest_phone) {
+    console.log("[SMS] Inget telefonnummer — skickar inget SMS.")
+    return
+  }
+
+  const name = booking.guest_first_name
+  const url = `${APP_URL}/guest/${booking.guest_token}`
+
+  const message =
+    booking.guest_language === "en"
+      ? `Thank you ${name}! Here is your mobile link to Grand Hotel Lysekil: ${url}`
+      : `Tack ${name}! Här kommer din mobillänk till Grand Hotel Lysekil: ${url}`
+
+  await sendSms(booking.guest_phone, message)
+}
+
+/**
  * Normalisera svenskt telefonnummer till E.164-format.
  * T.ex. 070-123 45 67 → +46701234567
  */

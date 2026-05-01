@@ -7,7 +7,7 @@
 
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { sendBookingSms } from "@/lib/sms"
+import { sendCompletionSms } from "@/lib/sms"
 import { sendGuestUpdatedNotification } from "@/lib/email"
 
 function getSupabase() {
@@ -185,7 +185,7 @@ export async function PATCH(
   if (smsDisabled) {
     console.log("[PATCH] SMS är AVSTÄNGT (DISABLE_SMS=true).")
   } else if (!hadPhoneBefore && hasPhoneNow && !smsAlreadySent) {
-    sendBookingSms({
+    sendCompletionSms({
       guest_first_name: booking.guest_first_name,
       guest_phone: booking.guest_phone,
       guest_token: token,
