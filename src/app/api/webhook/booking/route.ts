@@ -155,16 +155,17 @@ export async function POST(request: Request) {
 
   const booking = data?.[0]
 
-  // --- Skicka SMS om telefon finns ---
-  if (booking) {
-    if (booking.guest_phone) {
-      sendBookingSms(booking).catch((err) => {
-        console.error("[Webhook] Kunde inte skicka SMS:", err)
-      })
-    } else {
-      console.log("[Webhook] Inget telefonnummer — SMS ej skickat. Hotellet får skicka manuellt.")
-    }
-  }
+  // --- SMS tillfälligt avstängt medan vi felsöker gästsidan ---
+  console.log("[Webhook] SMS är tillfälligt avstängt.")
+  // if (booking) {
+  //   if (booking.guest_phone) {
+  //     sendBookingSms(booking).catch((err) => {
+  //       console.error("[Webhook] Kunde inte skicka SMS:", err)
+  //     })
+  //   } else {
+  //     console.log("[Webhook] Inget telefonnummer — SMS ej skickat.")
+  //   }
+  // }
 
   return NextResponse.json(
     { message: "Bokning mottagen och sparad!", booking },
