@@ -158,7 +158,10 @@ export async function POST(request: Request) {
   const booking = data?.[0]
 
   // --- Skicka välkomstmeddelande ENDAST vid nya bokningar och ENDAST om inte redan skickat ---
-  if (booking && body.event === "new" && !booking.sms_sent_at) {
+  const smsDisabled = process.env.DISABLE_SMS === "true"
+  if (smsDisabled) {
+    console.log("[Webhook] SMS är AVSTÄNGT (DISABLE_SMS=true). Inget välkomstmeddelande skickat.")
+  } else if (booking && body.event === "new" && !booking.sms_sent_at) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysekil.se"
     const guestUrl = `${appUrl}/guest/${booking.guest_token}`
 
