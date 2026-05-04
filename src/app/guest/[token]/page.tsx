@@ -204,22 +204,28 @@ function DetailsFormScreen({
           </div>
 
           <div>
-            <label htmlFor="eta" className="block text-xs font-medium text-granite mb-2">
+            <label className="block text-xs font-medium text-granite mb-2">
               Beräknad ankomsttid <span className="text-accent">*</span>
             </label>
-            <select
-              id="eta"
-              required
-              value={eta}
-              onChange={(e) => setEta(e.target.value)}
-              className="w-full rounded-2xl bg-white px-5 py-4 text-sm text-foreground shadow-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/15 transition-all duration-500 appearance-none cursor-pointer"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239da0a3' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 20px center" }}
-            >
-              <option value="" disabled>Välj tid</option>
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
               {etaOptions.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setEta(t)}
+                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    eta === t
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-white text-granite border border-sand hover:border-accent/40"
+                  }`}
+                >
+                  {t}
+                </button>
               ))}
-            </select>
+            </div>
+            {!eta && (
+              <p className="mt-1.5 text-[10px] text-granite-light">Välj en tid för att fortsätta</p>
+            )}
           </div>
 
           <div>
