@@ -273,7 +273,7 @@ function nightsBetween(checkIn: string, checkOut: string): number {
 function daysUntil(dateString: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const target = new Date(dateString);
+  const target = new Date(`${dateString}T00:00:00`);
   target.setHours(0, 0, 0, 0);
   return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }

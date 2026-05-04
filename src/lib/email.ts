@@ -277,7 +277,7 @@ export async function sendGuestExtraConfirmation({
       <h2 style="font-weight:600;font-size:20px;margin:8px 0;">Din beställning är mottagen</h2>
       <p>Hej ${guestName},</p>
       <p>Tack! Vi har tagit emot din intresseanmälan för <strong>${extraTitle}</strong> (${price} ${currency}). Receptionen förbereder detta inför din ankomst.</p>
-      <p>Har du frågor? Ring oss på <a href="tel:+4652310120">0523-101 20</a>.</p>
+      <p>Har du frågor? Ring oss på <a href="tel:+46523611000">0523-61 10 00</a>.</p>
       <p style="margin-top:32px;color:#8a7f72;font-size:12px;">Grand Hotel Lysekil · Kungsgatan 36, 453 33 Lysekil</p>
     </div>
   `;
