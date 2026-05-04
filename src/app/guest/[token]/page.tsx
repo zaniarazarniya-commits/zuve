@@ -269,6 +269,14 @@ function nightsBetween(checkIn: string, checkOut: string): number {
   return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+function daysUntil(dateString: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateString);
+  target.setHours(0, 0, 0, 0);
+  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 // ============================================================
 // STEG 4 — Tab-vy: Tillval / Lysekil / Restauranger
 // ============================================================
@@ -670,9 +678,24 @@ function MainScreen({
 function BookingOverviewCard({ booking }: { booking: Booking }) {
   const nights = nightsBetween(booking.check_in_date, booking.check_out_date);
   const isCancelled = booking.cancelled;
+  const days = daysUntil(booking.check_in_date);
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm space-y-5">
+      {/* Nedräkningsbanner */}
+      {!isCancelled && days > 0 && (
+        <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-2.5 text-center">
+          <p className="text-xs font-medium text-accent">
+            {days === 1 ? "1 dag kvar" : `${days} dagar kvar`} till incheckning
+          </p>
+        </div>
+      )}
+      {!isCancelled && days === 0 && (
+        <div className="rounded-xl bg-primary/10 border border-primary/20 px-4 py-2.5 text-center">
+          <p className="text-xs font-medium text-primary">Välkommen! Idag är din incheckningsdag.</p>
+        </div>
+      )}
+
       {/* Avbokningsvarning */}
       {isCancelled && (
         <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 font-medium text-center">
