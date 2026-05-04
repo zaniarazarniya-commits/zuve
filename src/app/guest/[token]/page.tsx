@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { useParams } from "next/navigation";
 import { CheckIcon } from "@/components/icons";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { upsells, activities, restaurants } from "@/lib/guest-data";
 import type { Booking } from "@/types/booking";
 
@@ -552,13 +553,14 @@ function ExploreScreen({ token, booking }: { token: string; booking: Booking }) 
   return (
     <div className="min-h-full content-in">
       {/* Header */}
-      <div className="text-center pt-10 pb-2 px-5">
-        <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-muted mb-3">
+      <div className="text-center pt-10 pb-4 px-5 space-y-4">
+        <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-muted">
           Din vistelse
         </p>
         <h2 className="text-[28px] font-semibold text-foreground leading-tight">
           Utforska Lysekil
         </h2>
+        <WeatherWidget />
       </div>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
