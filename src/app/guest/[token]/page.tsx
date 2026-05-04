@@ -151,9 +151,12 @@ function DetailsFormScreen({
   return (
     <div className="min-h-full px-5 pt-14 pb-8 content-in">
       <div className="max-w-lg mx-auto space-y-10">
-        <div className="flex items-center justify-center gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-sand" />
-          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="h-1 w-10 rounded-full bg-primary" />
+            <div className="h-1 w-10 rounded-full bg-sand" />
+          </div>
+          <p className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted">Steg 1 av 2</p>
         </div>
 
         <div className="text-center">
