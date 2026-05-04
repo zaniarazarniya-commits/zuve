@@ -697,6 +697,11 @@ function ExploreScreen({ token, booking }: { token: string; booking: Booking }) 
             </svg>
             0523-61 10 00
           </a>
+          <p className="text-[10px] text-granite-light/60">
+            <a href="/privacy" className="underline hover:text-granite-light transition-colors duration-300">
+              Integritetspolicy
+            </a>
+          </p>
         </footer>
       </div>
     </div>
@@ -717,7 +722,7 @@ function MainScreen({
   booking: Booking;
   onEdit: () => void;
 }) {
-  const [activeView, setActiveView] = useState<MainView>("booking");
+  const [activeView, setActiveView] = useState<MainView>("explore");
 
   return (
     <div className="min-h-full bg-background relative pb-20">
