@@ -7,17 +7,20 @@
 // ============================================================
 
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-import { sendExtraAddedNotification } from "@/lib/email"
+import { getSupabaseServiceClient } from "@/lib/supabase"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
+import { sendExtraAddedNotification, sendGuestExtraConfirmation } from "@/lib/email"
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
+const EXTRAS_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
 
 export async function POST(request: Request) {
+  // Rate limiting per IP
+  const clientIp = getClientIp(request)
+  const limit = rateLimit(`extras:${clientIp}`, EXTRAS_RATE_LIMIT)
+  if (!limit.success) {
+    return NextResponse.json({ error: "För många anrop" }, { status: 429 })
+  }
+
   let body: {
     token: string
     extra_id: string
@@ -43,11 +46,11 @@ export async function POST(request: Request) {
   }
 
   // --- Hämta bokningen via token ---
-  const supabase = getSupabase()
+  const supabase = getSupabaseServiceClient()
 
   const { data: booking, error: bookingError } = await supabase
     .from("bookings")
-    .select("id, guest_first_name, guest_last_name, sirvoy_booking_id")
+    .select("id, guest_first_name, guest_last_name, sirvoy_booking_id, guest_email")
     .eq("guest_token", token)
     .single()
 
@@ -84,10 +87,18 @@ export async function POST(request: Request) {
   }
 
   // --- Skicka e-postnotis till hotellet (fire-and-forget) ---
+  const commDisabled = process.env.DISABLE_COMMUNICATION === "true"
+  if (commDisabled) {
+    console.log("[Extras] Kommunikation är pausad (DISABLE_COMMUNICATION=true) — e-postnotis skickas inte.")
+    return NextResponse.json(
+      { message: "Tillval sparat (kommunikation pausad)", extra },
+      { status: 201 }
+    )
+  }
+
   console.log("[Extras] Försöker skicka tillvalsnotis:", {
-    guest: `${booking.guest_first_name} ${booking.guest_last_name}`,
     extra: title,
-    to: process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se",
+    booking: booking.sirvoy_booking_id ?? booking.id,
     smtp: process.env.SMTP_HOST ? "konfigurerad" : "SAKNAS",
   })
   sendExtraAddedNotification({
@@ -101,6 +112,19 @@ export async function POST(request: Request) {
     .catch((err) => {
       console.error("[Extras] Kunde inte skicka e-postnotis:", err)
     })
+
+  // Gästbekräftelse (fire-and-forget) om e-post finns
+  if (booking.guest_email) {
+    sendGuestExtraConfirmation({
+      guestName: `${booking.guest_first_name} ${booking.guest_last_name}`,
+      guestEmail: booking.guest_email,
+      extraTitle: title,
+      price,
+      currency: currency ?? "SEK",
+    }).catch((err) => {
+      console.error("[Extras] Kunde inte skicka gästbekräftelse:", err);
+    });
+  }
 
   return NextResponse.json(
     { message: "Tillval sparat", extra },

@@ -18,7 +18,13 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "info@grandhotellysekil.se"
  * @param subject Ämnesrad
  * @param body    Textinnehåll (plain text)
  */
+const COMMUNICATION_DISABLED = process.env.DISABLE_COMMUNICATION === "true"
+
 export async function sendAdminNotification(subject: string, body: string, html?: string): Promise<void> {
+  if (COMMUNICATION_DISABLED) {
+    console.warn("[Email] Kommunikation är pausad (DISABLE_COMMUNICATION=true) — e-post skickas inte.")
+    return
+  }
   console.log("[Email] sendAdminNotification anropad:", { subject, to: ADMIN_EMAIL, hasSmtp: !!SMTP_HOST })
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn("[Email] SMTP-konfiguration saknas — e-post skickas inte.")
@@ -30,6 +36,7 @@ export async function sendAdminNotification(subject: string, body: string, html?
     host: SMTP_HOST,
     port: SMTP_PORT,
     secure: SMTP_PORT === 465,
+    requireTLS: true,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
@@ -238,4 +245,48 @@ Grand Hotel Lysekil Gästapp
   </div>`
 
   await sendAdminNotification(subject, body, html)
+}
+
+export async function sendGuestExtraConfirmation({
+  guestName,
+  guestEmail,
+  extraTitle,
+  price,
+  currency,
+}: {
+  guestName: string;
+  guestEmail: string;
+  extraTitle: string;
+  price: number;
+  currency: string;
+}): Promise<void> {
+  if (COMMUNICATION_DISABLED) return;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return;
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    requireTLS: true,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  });
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1c2e36;">
+      <p style="color:#8a7f72;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;">Grand Hotel Lysekil</p>
+      <h2 style="font-weight:600;font-size:20px;margin:8px 0;">Din beställning är mottagen</h2>
+      <p>Hej ${guestName},</p>
+      <p>Tack! Vi har tagit emot din intresseanmälan för <strong>${extraTitle}</strong> (${price} ${currency}). Receptionen förbereder detta inför din ankomst.</p>
+      <p>Har du frågor? Ring oss på <a href="tel:+4652310120">0523-101 20</a>.</p>
+      <p style="margin-top:32px;color:#8a7f72;font-size:12px;">Grand Hotel Lysekil · Kungsgatan 36, 453 33 Lysekil</p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: `"Grand Hotel Lysekil" <${SMTP_USER}>`,
+    to: guestEmail,
+    subject: `Beställning bekräftad: ${extraTitle}`,
+    html,
+    text: `Hej ${guestName}, tack för din intresseanmälan för ${extraTitle} (${price} ${currency}). Ring 0523-101 20 om du har frågor.`,
+  });
 }
