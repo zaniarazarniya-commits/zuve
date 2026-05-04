@@ -568,9 +568,14 @@ function ExploreScreen({ token, booking }: { token: string; booking: Booking }) 
 
         <footer className="pt-8 pb-4 text-center space-y-3">
           <div className="w-8 h-px bg-sand mx-auto" />
-          <p className="text-xs text-granite-light font-light">
+          <a
+            href="https://maps.google.com/?q=Grand+Hotel+Lysekil,+Kungsgatan+36,+Lysekil"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-granite-light font-light hover:text-granite transition-colors duration-300 underline decoration-sand underline-offset-2"
+          >
             Grand Hotel Lysekil — Kungsgatan 36, 453 33 Lysekil
-          </p>
+          </a>
           <a
             href="tel:+46523611000"
             className="inline-flex items-center gap-1.5 text-sm text-sea hover:text-primary transition-colors duration-500"
