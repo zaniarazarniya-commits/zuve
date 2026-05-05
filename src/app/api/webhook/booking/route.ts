@@ -104,18 +104,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "För många anrop" }, { status: 429 })
   }
 
-  const webhookSecret = request.headers.get("x-webhook-secret")
-  const expectedSecret = process.env.SIRVOY_WEBHOOK_SECRET ?? process.env.WEBHOOK_SECRET
-
-  if (!expectedSecret) {
-    console.error("[Webhook] SIRVOY_WEBHOOK_SECRET eller WEBHOOK_SECRET saknas — avvisar anrop")
-    return NextResponse.json({ error: "Webhook inte konfigurerad" }, { status: 401 })
-  }
-
-  if (!webhookSecret || webhookSecret !== expectedSecret) {
-    console.error("[Webhook] Ogiltig eller saknad webhook-nyckel")
-    return NextResponse.json({ error: "Ogiltig webhook-nyckel" }, { status: 401 })
-  }
 
   let body: SirvoyWebhook
   try {
