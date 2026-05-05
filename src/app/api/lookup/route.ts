@@ -1,3 +1,9 @@
+// ============================================================
+// FIL: src/app/api/lookup/route.ts
+//
+// POST — tar emot ett bokningsnummer och returnerar dess guest_token.
+// ============================================================
+
 import { NextResponse } from "next/server"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
@@ -8,9 +14,10 @@ export async function POST(request: Request) {
   const clientIp = getClientIp(request)
   const limit = rateLimit(`lookup:${clientIp}`, LOOKUP_RATE_LIMIT)
   if (!limit.success) {
+    const retryAfterSecs = Math.ceil((limit.resetAt - Date.now()) / 1000)
     return NextResponse.json(
       { error: "För många försök, vänta en stund." },
-      { status: 429 }
+      { status: 429, headers: { "Retry-After": String(retryAfterSecs) } }
     )
   }
 
@@ -40,7 +47,18 @@ export async function POST(request: Request) {
     .eq("sirvoy_booking_id", bookingNumber)
     .single()
 
-  if (error || !data?.guest_token) {
+  if (error) {
+    if (error.code === "PGRST116") {
+      return NextResponse.json(
+        { error: "Ingen bokning hittades med det numret." },
+        { status: 404 }
+      )
+    }
+    console.error("[Lookup API] Databasfel, kod:", error.code)
+    return NextResponse.json({ error: "Något gick fel, försök igen." }, { status: 500 })
+  }
+
+  if (!data?.guest_token) {
     return NextResponse.json(
       { error: "Ingen bokning hittades med det numret." },
       { status: 404 }
