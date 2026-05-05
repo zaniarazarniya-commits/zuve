@@ -7,15 +7,17 @@
 // ============================================================
 
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { getSupabaseServiceClient } from "@/lib/supabase"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { sendBookingSms } from "@/lib/sms"
 import { sendGuestWelcomeEmail } from "@/lib/email"
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+const WEBHOOK_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
+
+function getTokenExpiry(checkOutDate: string): string {
+  const date = new Date(checkOutDate)
+  date.setDate(date.getDate() + 7)
+  return date.toISOString()
 }
 
 // ============================================================
@@ -95,10 +97,23 @@ function isOtaProxyEmail(email: string): boolean {
 // POST — anropas av Sirvoy vid ny bokning, ändring eller avbokning.
 // ============================================================
 export async function POST(request: Request) {
-  // Valfri webhook-secret-validering (Sirvoy stöder inte alltid custom headers)
+  // Rate limiting
+  const clientIp = getClientIp(request)
+  const limit = rateLimit(`webhook:${clientIp}`, WEBHOOK_RATE_LIMIT)
+  if (!limit.success) {
+    return NextResponse.json({ error: "För många anrop" }, { status: 429 })
+  }
+
   const webhookSecret = request.headers.get("x-webhook-secret")
   const expectedSecret = process.env.SIRVOY_WEBHOOK_SECRET ?? process.env.WEBHOOK_SECRET
-  if (expectedSecret && webhookSecret && webhookSecret !== expectedSecret) {
+
+  if (!expectedSecret) {
+    console.error("[Webhook] SIRVOY_WEBHOOK_SECRET eller WEBHOOK_SECRET saknas — avvisar anrop")
+    return NextResponse.json({ error: "Webhook inte konfigurerad" }, { status: 401 })
+  }
+
+  if (!webhookSecret || webhookSecret !== expectedSecret) {
+    console.error("[Webhook] Ogiltig eller saknad webhook-nyckel")
     return NextResponse.json({ error: "Ogiltig webhook-nyckel" }, { status: 401 })
   }
 
@@ -117,7 +132,7 @@ export async function POST(request: Request) {
   }
 
   const primaryRoom = body.rooms?.[0] ?? null
-  const supabase = getSupabase()
+  const supabase = getSupabaseServiceClient()
 
   // --- Slå upp room_id från rooms-tabellen ---
   let room_id: string | null = null
@@ -163,10 +178,11 @@ export async function POST(request: Request) {
         sirvoy_room_name: primaryRoom?.RoomName ?? null,
         sirvoy_room_type: primaryRoom?.RoomTypeName ?? null,
         room_id,
+        token_expires_at: getTokenExpiry(body.departureDate),
       },
       { onConflict: "external_booking_id" }
     )
-    .select("id, guest_first_name, guest_email, guest_phone, guest_token, guest_language, sms_sent_at")
+    .select("id, guest_first_name, guest_email, guest_phone, guest_token, guest_language, sms_sent_at, sms_opt_out, email_opt_out")
 
   if (error) {
     console.error("Supabase-fel:", error)
@@ -181,9 +197,9 @@ export async function POST(request: Request) {
   const cutoffDate = new Date("2026-05-01T00:00:00Z")
   const isNewBooking = bookingDate && bookingDate >= cutoffDate
 
-  const smsDisabled = process.env.DISABLE_SMS === "true"
-  if (smsDisabled) {
-    console.log("[Webhook] SMS är AVSTÄNGT (DISABLE_SMS=true). Inget välkomstmeddelande skickat.")
+  const commDisabled = process.env.DISABLE_COMMUNICATION === "true"
+  if (commDisabled) {
+    console.log("[Webhook] Kommunikation är pausad (DISABLE_COMMUNICATION=true). Inget välkomstmeddelande skickat.")
   } else if (booking && body.event === "new" && !booking.sms_sent_at && isNewBooking) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysekil.se"
     const guestUrl = `${appUrl}/guest/${booking.guest_token}`
@@ -191,7 +207,13 @@ export async function POST(request: Request) {
     // 1. Försök SMS först
     if (booking.guest_phone) {
       try {
-        await sendBookingSms(booking)
+        await sendBookingSms({
+          guest_first_name: booking.guest_first_name,
+          guest_phone: booking.guest_phone,
+          guest_token: booking.guest_token,
+          guest_language: booking.guest_language,
+          sms_opt_out: booking.sms_opt_out,
+        })
         await supabase
           .from("bookings")
           .update({ sms_sent_at: new Date().toISOString() })
@@ -202,7 +224,7 @@ export async function POST(request: Request) {
       }
     }
     // 2. Om ingen telefon men riktig e-post finns → skicka välkomstmejl
-    else if (booking.guest_email && !isOtaProxyEmail(booking.guest_email)) {
+    else if (booking.guest_email && !isOtaProxyEmail(booking.guest_email) && !booking.email_opt_out) {
       try {
         await sendGuestWelcomeEmail({
           to: booking.guest_email,
@@ -221,7 +243,7 @@ export async function POST(request: Request) {
     }
     // 3. OTA-proxy-e-post (Expedia, Booking.com etc.) → skicka inget
     else if (booking.guest_email && isOtaProxyEmail(booking.guest_email)) {
-      console.log(`[Webhook] OTA-proxy-e-post upptäckt (${booking.guest_email}) — välkomstmeddelande skickas ej.`)
+      console.log(`[Webhook] OTA-proxy-e-post upptäckt — välkomstmeddelande skickas ej.`)
     }
     // 4. Ingen kontaktinfo alls
     else {
