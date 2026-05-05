@@ -15,7 +15,13 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://gast.grandhotellysek
  * @param phone   Mottagarens telefonnummer (E.164-format, t.ex. +46701234567)
  * @param message SMS-text (max 1600 tecken)
  */
+const COMMUNICATION_DISABLED = process.env.DISABLE_COMMUNICATION === "true"
+
 export async function sendSms(phone: string, message: string): Promise<void> {
+  if (COMMUNICATION_DISABLED) {
+    console.warn("[SMS] Kommunikation är pausad (DISABLE_COMMUNICATION=true) — SMS skickas inte.")
+    return
+  }
   if (!ELKS_API_USERNAME || !ELKS_API_PASSWORD) {
     console.warn("[SMS] ELKS_API_USERNAME eller ELKS_API_PASSWORD saknas — SMS skickas inte.")
     return
@@ -68,7 +74,12 @@ export async function sendBookingSms(booking: {
   guest_phone: string | null
   guest_token: string
   guest_language?: string | null
+  sms_opt_out?: boolean | null
 }): Promise<void> {
+  if (booking.sms_opt_out) {
+    console.log("[SMS] Gästen har tackat nej till SMS — skickar inget.")
+    return
+  }
   if (!booking.guest_phone) {
     console.log("[SMS] Inget telefonnummer — skickar inget SMS.")
     return
@@ -93,7 +104,12 @@ export async function sendCompletionSms(booking: {
   guest_phone: string | null
   guest_token: string
   guest_language?: string | null
+  sms_opt_out?: boolean | null
 }): Promise<void> {
+  if (booking.sms_opt_out) {
+    console.log("[SMS] Gästen har tackat nej till SMS — skickar inget.")
+    return
+  }
   if (!booking.guest_phone) {
     console.log("[SMS] Inget telefonnummer — skickar inget SMS.")
     return
