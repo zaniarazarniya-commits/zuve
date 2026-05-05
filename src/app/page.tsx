@@ -65,6 +65,7 @@ export default function LookupPage() {
               id="booking-number"
               type="text"
               inputMode="numeric"
+              autoComplete="off"
               value={bookingNumber}
               onChange={(e) => setBookingNumber(e.target.value)}
               placeholder="t.ex. 12345"
@@ -74,7 +75,7 @@ export default function LookupPage() {
           </div>
 
           {error && (
-            <p className="text-[11.5px] text-red-600 leading-snug">{error}</p>
+            <p role="alert" className="text-[11.5px] text-red-600 leading-snug">{error}</p>
           )}
 
           <button
