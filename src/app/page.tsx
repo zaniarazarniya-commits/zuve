@@ -1,52 +1,102 @@
-export default function Home() {
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function LookupPage() {
+  const router = useRouter();
+  const [bookingNumber, setBookingNumber] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ booking_number: bookingNumber.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Något gick fel, försök igen.");
+        return;
+      }
+
+      router.push(`/guest/${data.token}`);
+    } catch {
+      setError("Något gick fel, försök igen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[#faf9f6] flex flex-col items-center justify-center px-6 text-center">
-      <div className="max-w-md space-y-8">
-        {/* Logo / Hotel name */}
-        <div className="space-y-3">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-[#8c7c6c]">Grand Hotel Lysekil</p>
-          <h1 className="font-serif text-4xl font-light text-[#1a1a1a] tracking-tight">Zuve</h1>
-          <p className="text-sm text-[#8c7c6c] font-light">Din personliga gästportal</p>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-[#d4cfc7]" />
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-[#b5a89a]" stroke="currentColor" strokeWidth="1.5">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          <div className="flex-1 h-px bg-[#d4cfc7]" />
-        </div>
-
-        {/* Message */}
-        <div className="space-y-4 text-[#4a4a4a]">
-          <p className="text-base leading-relaxed font-light">
-            Välkommen till Grand Hotel Lysekils gästportal. Här kan du som gäst se din bokning, lägga till tillval och upptäcka det bästa av Lysekil.
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
+      <div className="w-full max-w-[340px]">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <p className="text-[9.5px] tracking-[0.3em] uppercase text-accent font-medium mb-3">
+            Välkommen
           </p>
-          <p className="text-sm text-[#8c7c6c] leading-relaxed">
-            Du når din personliga sida via länken i SMS:et du fick vid bokning. Har du inte fått något SMS? Kontakta receptionen så hjälper vi dig.
+          <h1 className="font-serif text-[34px] text-primary leading-tight tracking-tight">
+            Grand Hotel Lysekil
+          </h1>
+          <p className="mt-3 text-[12.5px] text-granite leading-relaxed">
+            Ange ditt bokningsnummer för att komma till din gästsida.
           </p>
         </div>
 
-        {/* Contact */}
-        <div className="pt-4">
-          <a
-            href="tel:+4652310120"
-            className="inline-flex items-center gap-2 text-sm text-[#1a1a1a] hover:text-[#8c7c6c] transition-colors"
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="booking-number"
+              className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium"
+            >
+              Bokningsnummer
+            </label>
+            <input
+              id="booking-number"
+              type="text"
+              inputMode="numeric"
+              value={bookingNumber}
+              onChange={(e) => setBookingNumber(e.target.value)}
+              placeholder="t.ex. 12345"
+              required
+              className="w-full px-4 py-3 rounded-[4px] border border-sand bg-white text-[14px] text-foreground placeholder:text-granite-light focus:outline-none focus:border-primary transition-colors"
+            />
+          </div>
+
+          {error && (
+            <p className="text-[11.5px] text-red-600 leading-snug">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !bookingNumber.trim()}
+            className="w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
           >
-            <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-            </svg>
-            0523 — 101 20
-          </a>
-        </div>
+            {loading ? "Söker…" : "Hitta min bokning"}
+          </button>
+        </form>
 
         {/* Footer */}
-        <p className="text-[11px] text-[#b5a89a] tracking-wide">
-          Kungsgatan 36 · 453 33 Lysekil
+        <p className="mt-10 text-center text-[10px] text-granite-light">
+          Hittar du inte din bokning?{" "}
+          <a
+            href="tel:+46523611000"
+            className="underline underline-offset-2"
+          >
+            Ring oss
+          </a>
         </p>
       </div>
     </main>
-  )
+  );
 }
