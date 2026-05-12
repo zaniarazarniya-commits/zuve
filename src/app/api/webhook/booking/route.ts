@@ -10,7 +10,7 @@ import { NextResponse } from "next/server"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { sendBookingSms } from "@/lib/sms"
-import { sendGuestWelcomeEmail } from "@/lib/email"
+import { sendGuestWelcomeEmail, sendManualDeliveryNotification } from "@/lib/email"
 
 const WEBHOOK_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
 
@@ -89,7 +89,8 @@ function isOtaProxyEmail(email: string): boolean {
     lower.endsWith("@agoda.com") ||
     lower.endsWith("@partners.airbnb.com") ||
     lower.endsWith("@trip.com") ||
-    lower.endsWith("@travelport.com")
+    lower.endsWith("@travelport.com") ||
+    lower.endsWith("@privaterelay.appleid.com")
   )
 }
 
@@ -229,13 +230,34 @@ export async function POST(request: Request) {
         console.error("[Webhook] Kunde inte skicka välkomstmejl:", err)
       }
     }
-    // 3. OTA-proxy-e-post (Expedia, Booking.com etc.) → skicka inget
+    // 3. Proxy-/skyddad e-post → kan ej leverera automatiskt, notifiera receptionen
     else if (booking.guest_email && isOtaProxyEmail(booking.guest_email)) {
-      console.log(`[Webhook] OTA-proxy-e-post upptäckt — välkomstmeddelande skickas ej.`)
+      console.log(`[Webhook] Proxy-e-post upptäckt (${booking.guest_email}) — skickar intern notis om manuell leverans.`)
+      try {
+        await sendManualDeliveryNotification({
+          guestName: booking.guest_first_name,
+          bookingId: body.bookingId.toString(),
+          guestUrl,
+          reason: "proxy_email",
+          proxyEmail: booking.guest_email,
+        })
+      } catch (err) {
+        console.error("[Webhook] Kunde inte skicka intern notis (proxy):", err)
+      }
     }
-    // 4. Ingen kontaktinfo alls
+    // 4. Ingen kontaktinfo alls → notifiera receptionen
     else {
-      console.log("[Webhook] Ingen telefon eller e-post — välkomstmeddelande ej skickat.")
+      console.log("[Webhook] Ingen telefon eller e-post — skickar intern notis om manuell leverans.")
+      try {
+        await sendManualDeliveryNotification({
+          guestName: booking.guest_first_name,
+          bookingId: body.bookingId.toString(),
+          guestUrl,
+          reason: "no_contact",
+        })
+      } catch (err) {
+        console.error("[Webhook] Kunde inte skicka intern notis (ingen kontaktinfo):", err)
+      }
     }
   } else if (booking && body.event === "new" && !isNewBooking) {
     console.log(`[Webhook] Bokningen är från ${body.bookingDate} — äldre än 2026-05-01. Välkomstmeddelande skickas ej.`)

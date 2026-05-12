@@ -247,6 +247,66 @@ Grand Hotel Lysekil Gästapp
   await sendAdminNotification(subject, body, html)
 }
 
+/**
+ * Notifikation: token kunde ej levereras automatiskt — skicka manuellt via extranätet.
+ */
+export async function sendManualDeliveryNotification(params: {
+  guestName: string
+  bookingId: string
+  guestUrl: string
+  reason: "proxy_email" | "no_contact"
+  proxyEmail?: string
+}): Promise<void> {
+  const reasonText = params.reason === "proxy_email"
+    ? `Proxy-/skyddad e-postadress (${params.proxyEmail}) — kan ej ta emot automatisk länk.`
+    : "Gästen saknar både telefonnummer och e-postadress i systemet."
+
+  const subject = `Manuell länkleverans krävs — ${params.guestName} (${params.bookingId})`
+
+  const body = `
+Hej,
+
+Gästlänken till Zuve kunde INTE skickas automatiskt för nedanstående gäst.
+Skicka länken manuellt via extranätet.
+
+Gäst:      ${params.guestName}
+Bokning:   ${params.bookingId}
+Orsak:     ${reasonText}
+
+Länk att skicka till gästen:
+${params.guestUrl}
+
+Åtgärd: Gå in i extranätet (Sirvoy), hitta bokning #${params.bookingId} och skicka länken ovan direkt till gästen.
+
+Med vänlig hälsning,
+Grand Hotel Lysekil Gästportal
+  `.trim()
+
+  const html = `<div style="font-family:Georgia,serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1a1a1a;background:#faf9f6;">
+    <p style="text-align:center;font-size:11px;letter-spacing:0.15em;color:#8c7c6c;text-transform:uppercase;margin-bottom:8px;">Grand Hotel Lysekil</p>
+    <h1 style="font-weight:300;font-size:20px;text-align:center;margin:0 0 8px;color:#c0392b;">⚠ Manuell länkleverans krävs</h1>
+    <p style="text-align:center;font-size:13px;color:#8c7c6c;margin:0 0 24px;">Gästlänken kunde inte skickas automatiskt</p>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <table style="width:100%;font-size:14px;line-height:1.8;">
+      <tr><td style="color:#8c7c6c;width:90px;vertical-align:top;">Gäst</td><td style="font-weight:500;">${params.guestName}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Bokning</td><td style="font-family:monospace;font-size:12px;">#${params.bookingId}</td></tr>
+      <tr><td style="color:#8c7c6c;vertical-align:top;">Orsak</td><td style="color:#c0392b;font-size:13px;">${reasonText}</td></tr>
+    </table>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:13px;color:#4a4a4a;margin-bottom:12px;font-weight:500;">Länk att skicka till gästen:</p>
+    <div style="background:#f0ede8;border-radius:6px;padding:14px 16px;word-break:break-all;">
+      <a href="${params.guestUrl}" style="color:#1a3a4a;font-size:13px;font-family:monospace;">${params.guestUrl}</a>
+    </div>
+    <hr style="border:0;height:1px;background:#d4cfc7;margin:24px 0;">
+    <p style="font-size:13px;color:#4a4a4a;">
+      <strong>Åtgärd:</strong> Gå in i extranätet (Sirvoy), hitta bokning <strong>#${params.bookingId}</strong> och skicka länken ovan direkt till gästen.
+    </p>
+    <p style="font-size:11px;color:#b5a89a;text-align:center;margin-top:32px;">Grand Hotel Lysekil Gästportal</p>
+  </div>`
+
+  await sendAdminNotification(subject, body, html)
+}
+
 export async function sendGuestExtraConfirmation({
   guestName,
   guestEmail,
