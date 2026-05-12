@@ -436,13 +436,13 @@ function BookingOverviewCard({ booking }: { booking: Booking }) {
         )}
       </div>
 
-      {booking.booking_extras && booking.booking_extras.length > 0 && (
+      {booking.booking_extras && booking.booking_extras.filter((e) => isGuestVisibleExtra(e.title)).length > 0 && (
         <>
           <div className="h-px bg-sand-light/70 my-6" />
           <div>
             <p className="text-[9px] tracking-[0.24em] uppercase text-muted font-medium mb-3">Tillägg</p>
             <div className="flex flex-col gap-2">
-              {booking.booking_extras.map((extra) => (
+              {booking.booking_extras.filter((e) => isGuestVisibleExtra(e.title)).map((extra) => (
                 <div key={extra.id} className="flex items-center justify-between gap-3">
                   <p className="text-sm text-primary leading-snug">{extra.title}</p>
                   <span className="text-[11px] text-granite whitespace-nowrap">
@@ -480,6 +480,23 @@ function BookingOverviewCard({ booking }: { booking: Booking }) {
       </div>
     </div>
   );
+}
+
+// Nyckelord för tillval som är synliga för gästen.
+// Matchar mot Sirvoys engelska titlar OCH svenska varianter.
+const GUEST_VISIBLE_KEYWORDS = [
+  "sen utcheckning", "late check",
+  "tidig incheckning", "early check",
+  "extra säng", "extra bed",
+  "babybed", "baby bed", "crib", "cot",
+  "frukost", "breakfast",
+  "husdjur", "pet fee", "pet charge",
+  "minibar",
+]
+
+function isGuestVisibleExtra(title: string): boolean {
+  const lower = title.toLowerCase()
+  return GUEST_VISIBLE_KEYWORDS.some((kw) => lower.includes(kw))
 }
 
 // ============================================================
