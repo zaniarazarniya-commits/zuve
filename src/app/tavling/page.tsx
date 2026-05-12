@@ -97,7 +97,7 @@ export default function TavlingPage() {
             <div className="w-8 h-px bg-accent" />
           </div>
           <p className="text-[12.5px] text-granite leading-relaxed">
-            Fyll i dina uppgifter och delta i utlottningen av en gratis frukost för två på Grand Hotel Lysekil.
+            Fyll i dina uppgifter och delta i utlottningen av en gratis frukost för en person på Grand Hotel Lysekil.
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export default function TavlingPage() {
         </form>
 
         <p className="mt-8 text-center text-[10px] text-granite-light leading-relaxed">
-          Grand Hotel Lysekil · Strandvägen 1 · Lysekil
+          Grand Hotel Lysekil · Kungsgatan 36 · Lysekil
         </p>
       </div>
     </main>
