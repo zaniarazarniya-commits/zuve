@@ -4,7 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useParams } from "next/navigation";
 import { CheckIcon } from "@/components/icons";
 import { WeatherWidget } from "@/components/WeatherWidget";
-import { upsells, activities, restaurants } from "@/lib/guest-data";
+import { upsells, recommendations } from "@/lib/guest-data";
 import type { Booking } from "@/types/booking";
 
 // ============================================================
@@ -464,9 +464,9 @@ function BookingOverviewCard({ booking }: { booking: Booking }) {
 }
 
 // ============================================================
-// STEG 4 — Tabs / Tillval / Aktiviteter / Restauranger
+// STEG 4 — Tabs / Tillval / Grand rekommenderar
 // ============================================================
-type Tab = "upsells" | "activities" | "restaurants";
+type Tab = "upsells" | "recommendations";
 
 function ExperienceCard({
   imageUrl, title, subtitle, description, tag, rightElement,
@@ -645,52 +645,39 @@ function UpsellModal({
   );
 }
 
-function RestaurantCard({ item }: { item: typeof restaurants[0] }) {
-  return (
-    <ExperienceCard
-      imageUrl={item.imageUrl}
-      title={item.name}
-      subtitle={[item.cuisine, item.distance].filter(Boolean).join(" · ")}
-      description={item.description}
-      rightElement={
-        item.phone ? (
-          <a
-            href={`tel:${item.phone.replace(/\s/g, "")}`}
-            className="inline-flex items-center gap-2 border border-primary/25 text-primary px-4 py-2.5 rounded-[4px] text-[10.5px] tracking-[0.2em] uppercase font-medium hover:bg-primary hover:text-background transition-all duration-500"
-          >
-            Boka bord
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </a>
-        ) : undefined
-      }
-    />
-  );
-}
+function RecommendationCard({ item }: { item: typeof recommendations[0] }) {
+  const cta = item.phone ? (
+    <a
+      href={`tel:${item.phone.replace(/\s/g, "")}`}
+      className="inline-flex items-center gap-2 border border-primary/25 text-primary px-4 py-2.5 rounded-[4px] text-[10.5px] tracking-[0.2em] uppercase font-medium hover:bg-primary hover:text-background transition-all duration-500"
+    >
+      Boka bord
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </a>
+  ) : item.link ? (
+    <a
+      href={item.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 border border-primary/25 text-primary px-4 py-2.5 rounded-[4px] text-[10.5px] tracking-[0.2em] uppercase font-medium hover:bg-primary hover:text-background transition-all duration-500"
+    >
+      Läs mer
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </a>
+  ) : undefined;
 
-function ActivityCard({ item }: { item: typeof activities[0] }) {
   return (
     <ExperienceCard
       imageUrl={item.imageUrl}
       title={item.title}
+      subtitle={item.meta}
       description={item.description}
       tag={item.tag}
-      rightElement={
-        item.link ? (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border border-primary/25 text-primary px-4 py-2.5 rounded-[4px] text-[10.5px] tracking-[0.2em] uppercase font-medium hover:bg-primary hover:text-background transition-all duration-500"
-          >
-            Läs mer
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </a>
-        ) : undefined
-      }
+      rightElement={cta}
     />
   );
 }
@@ -698,8 +685,7 @@ function ActivityCard({ item }: { item: typeof activities[0] }) {
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   const tabs: { key: Tab; label: string }[] = [
     { key: "upsells", label: "Tillval" },
-    { key: "activities", label: "Lysekil" },
-    { key: "restaurants", label: "Restauranger" },
+    { key: "recommendations", label: "Grand rekommenderar" },
   ];
 
   return (
@@ -727,8 +713,7 @@ function TabContent({ token, activeTab }: { token: string; activeTab: Tab }) {
   return (
     <div className="space-y-[18px] animate-fade-in">
       {activeTab === "upsells" && upsells.map((item) => <UpsellCard key={item.id} token={token} item={item} />)}
-      {activeTab === "activities" && activities.map((item) => <ActivityCard key={item.id} item={item} />)}
-      {activeTab === "restaurants" && restaurants.map((item) => <RestaurantCard key={item.id} item={item} />)}
+      {activeTab === "recommendations" && recommendations.map((item) => <RecommendationCard key={item.id} item={item} />)}
     </div>
   );
 }
