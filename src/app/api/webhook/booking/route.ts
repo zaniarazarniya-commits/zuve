@@ -134,6 +134,25 @@ export async function POST(request: Request) {
   const primaryRoom = body.rooms?.[0] ?? null
   const supabase = getSupabaseServiceClient()
 
+  // --- Vid modified: bevara fält som gästen satt i vår app ---
+  // Sirvoy vet inte om eta/notes/phone som gästen uppdaterat hos oss,
+  // så ett modified-event skulle annars skriva över dessa med null.
+  let preservedEta: string | null = null
+  let preservedNotes: string | null = null
+  let preservedPhone: string | null = null
+  if (body.event === "modified") {
+    const { data: existing } = await supabase
+      .from("bookings")
+      .select("eta, notes, guest_phone")
+      .eq("external_booking_id", String(body.bookingId))
+      .single()
+    if (existing) {
+      preservedEta = existing.eta ?? null
+      preservedNotes = existing.notes ?? null
+      preservedPhone = existing.guest_phone ?? null
+    }
+  }
+
   // --- Slå upp room_id från rooms-tabellen ---
   let room_id: string | null = null
   if (primaryRoom?.RoomName) {
@@ -160,14 +179,14 @@ export async function POST(request: Request) {
         guest_first_name: body.guest.firstName,
         guest_last_name: body.guest.lastName,
         guest_email: body.guest.email,
-        guest_phone: body.guest.phone ?? null,
+        guest_phone: preservedPhone ?? body.guest.phone ?? null,
         guest_language: body.guest.language ?? "sv",
-        notes: body.guest.message ?? null,
+        notes: preservedNotes ?? body.guest.message ?? null,
 
         check_in_date: body.arrivalDate,
         check_out_date: body.departureDate,
         number_of_guests: body.totalAdults,
-        eta: body.eta ?? null,
+        eta: preservedEta ?? body.eta ?? null,
         booking_source: body.bookingSource ?? null,
         status: mapStatus(body),
         cancelled: body.cancelled,
