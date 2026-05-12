@@ -832,7 +832,7 @@ function MainScreen({
                 onClick={onEdit}
                 className="w-full py-[15px] rounded-[4px] bg-white border border-sand/60 text-primary text-[10.5px] tracking-[0.22em] uppercase font-medium hover:bg-sand-light/40 transition-all duration-500"
               >
-                {booking.eta ? "Redigera dina uppgifter" : "Komplettera din ankomst"}
+                Redigera uppgifter
               </button>
 
               <p className="text-[10.5px] text-muted text-center pt-1">
