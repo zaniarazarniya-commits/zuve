@@ -43,6 +43,16 @@ interface SirvoyRoom {
   roomTotal: number
 }
 
+interface SirvoyAdditionalItem {
+  extraOptionId: number
+  description: string
+  specificDate?: string | null
+  quantity: number
+  price: number
+  itemTotal: number
+  ledgerAccount?: string | null
+}
+
 interface SirvoyWebhook {
   version: string
   event: "new" | "modified" | "deleted"
@@ -63,6 +73,7 @@ interface SirvoyWebhook {
   bookingIsConfirmed: boolean
   guest: SirvoyGuest
   rooms: SirvoyRoom[]
+  additionalItems?: SirvoyAdditionalItem[]
 }
 
 // ============================================================
@@ -179,6 +190,37 @@ export async function POST(request: Request) {
   }
 
   const booking = data?.[0]
+
+  // --- Synka additionalItems från Sirvoy till booking_extras ---
+  if (booking && Array.isArray(body.additionalItems) && body.additionalItems.length > 0) {
+    // Ta bort gamla Sirvoy-extras för denna bokning och ersätt med aktuella
+    await supabase
+      .from("booking_extras")
+      .delete()
+      .eq("booking_id", booking.id)
+      .eq("source", "sirvoy")
+
+    const extrasToInsert = body.additionalItems.map((item) => ({
+      booking_id: booking.id,
+      extra_id: `sirvoy-${item.extraOptionId}`,
+      title: item.description,
+      price: item.price,
+      currency: body.currency,
+      quantity: item.quantity,
+      status: "confirmed",
+      source: "sirvoy",
+    }))
+
+    const { error: extrasError } = await supabase
+      .from("booking_extras")
+      .insert(extrasToInsert)
+
+    if (extrasError) {
+      console.error("[Webhook] Kunde inte spara additionalItems:", extrasError)
+    } else {
+      console.log(`[Webhook] ${extrasToInsert.length} tillägg sparade för bokning ${booking.id}`)
+    }
+  }
 
   // --- Skicka välkomstmeddelande ENDAST vid nya bokningar ---
   // ENDAST för bokningar från och med 2026-05-01 (inte äldre bokningar som redan finns i systemet)

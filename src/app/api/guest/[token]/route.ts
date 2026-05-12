@@ -76,6 +76,14 @@ export async function GET(
         room_number,
         room_type,
         floor
+      ),
+      booking_extras (
+        id,
+        title,
+        price,
+        currency,
+        quantity,
+        status
       )
     `)
     .eq("guest_token", token)

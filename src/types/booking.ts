@@ -4,6 +4,15 @@ export interface Room {
   floor: number;
 }
 
+export interface BookingExtra {
+  id: string;
+  title: string;
+  price: number;
+  currency: string;
+  quantity: number;
+  status: string;
+}
+
 export interface Booking {
   guest_first_name: string;
   guest_last_name: string;
@@ -22,6 +31,7 @@ export interface Booking {
   sirvoy_room_type: string;
   sirvoy_booking_id?: string;
   rooms: Room;
+  booking_extras?: BookingExtra[];
 }
 
 export interface ApiResponse {

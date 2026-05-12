@@ -436,6 +436,25 @@ function BookingOverviewCard({ booking }: { booking: Booking }) {
         )}
       </div>
 
+      {booking.booking_extras && booking.booking_extras.length > 0 && (
+        <>
+          <div className="h-px bg-sand-light/70 my-6" />
+          <div>
+            <p className="text-[9px] tracking-[0.24em] uppercase text-muted font-medium mb-3">Tillägg</p>
+            <div className="flex flex-col gap-2">
+              {booking.booking_extras.map((extra) => (
+                <div key={extra.id} className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-primary leading-snug">{extra.title}</p>
+                  <span className="text-[11px] text-granite whitespace-nowrap">
+                    {extra.quantity > 1 && `${extra.quantity} × `}{extra.price.toLocaleString("sv-SE")} {extra.currency}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="h-px bg-sand-light/70 my-6" />
 
       {/* Pris + status */}
