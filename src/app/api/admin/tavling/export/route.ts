@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from("contest_entries")
-    .select("name, phone, email, address, city, postal_code, created_at")
+    .select("name, phone, email, city, visit_reason, created_at")
     .order("created_at", { ascending: false });
 
   if (month) {
@@ -31,9 +31,8 @@ export async function GET(req: NextRequest) {
     Namn: e.name,
     Telefon: e.phone,
     "E-post": e.email,
-    Adress: e.address,
     Stad: e.city,
-    Postnummer: e.postal_code,
+    "Anledning till besök": e.visit_reason,
     Datum: new Date(e.created_at).toLocaleDateString("sv-SE"),
   }));
 

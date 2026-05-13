@@ -7,9 +7,8 @@ type Entry = {
   name: string;
   phone: string;
   email: string;
-  address: string;
   city: string;
-  postal_code: string;
+  visit_reason: string;
   created_at: string;
 };
 
@@ -145,7 +144,7 @@ export default function AdminTavlingPage() {
                   <table className="w-full text-[12px] text-foreground">
                     <thead>
                       <tr className="border-b border-sand bg-sand-light">
-                        {["Namn", "Telefon", "E-post", "Adress", "Stad", "Postnr", "Datum"].map((h) => (
+                        {["Namn", "Telefon", "E-post", "Stad", "Anledning", "Datum"].map((h) => (
                           <th
                             key={h}
                             className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -164,9 +163,8 @@ export default function AdminTavlingPage() {
                           <td className="px-4 py-3 whitespace-nowrap">{e.name}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-granite">{e.phone}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-sea">{e.email}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-granite">{e.address}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-granite">{e.city}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-granite">{e.postal_code}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-granite">{e.visit_reason}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-granite-light">
                             {new Date(e.created_at).toLocaleDateString("sv-SE")}
                           </td>

@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = getSupabaseServiceClient();
   const { data, error } = await supabase
     .from("contest_entries")
-    .select("id, name, phone, email, address, city, postal_code, created_at")
+    .select("id, name, phone, email, city, visit_reason, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {

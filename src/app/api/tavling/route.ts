@@ -3,9 +3,9 @@ import { getSupabaseServiceClient } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, phone, email, address, city, postal_code } = body;
+  const { name, phone, email, city, visit_reason } = body;
 
-  if (!name || !phone || !email || !address || !city || !postal_code) {
+  if (!name || !phone || !email || !city || !visit_reason) {
     return NextResponse.json({ error: "Alla fält är obligatoriska." }, { status: 400 });
   }
 
@@ -14,9 +14,8 @@ export async function POST(req: NextRequest) {
     name: name.trim(),
     phone: phone.trim(),
     email: email.trim().toLowerCase(),
-    address: address.trim(),
     city: city.trim(),
-    postal_code: postal_code.trim(),
+    visit_reason: visit_reason.trim(),
   });
 
   if (error) {
