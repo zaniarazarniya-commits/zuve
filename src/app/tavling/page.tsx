@@ -87,7 +87,7 @@ export default function TavlingPage() {
       <div className="w-full max-w-[340px]">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-6">
-            <GrandLogo variant="compact" width={110} />
+            <GrandLogo variant="compact" width={150} />
           </div>
           <GrandSwash gold width={60} className="mx-auto mb-4" />
           <p className="font-baskerville text-[9px] tracking-[0.32em] uppercase text-muted font-medium mb-3">

@@ -59,6 +59,7 @@ export function GrandSwash({ className = "", width = 80, gold = false }: { class
       width={width}
       height={Math.round(width * 0.3)}
       className={`object-contain select-none ${className}`}
+      style={{ mixBlendMode: "multiply" }}
       draggable={false}
     />
   );
