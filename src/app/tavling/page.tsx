@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GrandLogo, GrandSwash, GrandMonogram } from "@/components/GrandLogo";
 
 const VISIT_REASONS = ["Semester", "Jobb", "Konferens", "Övrigt"] as const;
 type VisitReason = typeof VISIT_REASONS[number];
@@ -60,23 +61,22 @@ export default function TavlingPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
         <div className="w-full max-w-[340px] text-center reveal-in">
-          <div className="mb-6 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-sand-light flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-primary">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
+          <div className="mb-6 flex justify-center">
+            <GrandLogo variant="compact" width={100} />
           </div>
-          <p className="text-[9.5px] tracking-[0.3em] uppercase text-accent font-medium mb-3">
+          <GrandMonogram size={40} className="mx-auto mb-4 opacity-60" />
+          <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
             Anmälan mottagen
           </p>
-          <h1 className="font-serif text-[30px] text-primary leading-tight tracking-tight mb-4">
+          <h1 className="font-script text-[44px] text-primary leading-tight mb-4">
             Tack för ditt deltagande!
           </h1>
           <p className="text-[12.5px] text-granite leading-relaxed">
             Du är nu med i utlottningen av en gratis frukost på Grand Hotel Lysekil. Lycka till!
           </p>
-          <div className="mt-8 w-8 h-px bg-accent mx-auto" />
+          <div className="mt-8">
+            <GrandSwash gold width={60} className="mx-auto" />
+          </div>
         </div>
       </main>
     );
@@ -86,13 +86,17 @@ export default function TavlingPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
       <div className="w-full max-w-[340px]">
         <div className="text-center mb-10">
-          <p className="text-[9.5px] tracking-[0.3em] uppercase text-accent font-medium mb-3">
-            Tävling
+          <div className="flex justify-center mb-6">
+            <GrandLogo variant="compact" width={110} />
+          </div>
+          <GrandSwash gold width={60} className="mx-auto mb-4" />
+          <p className="font-baskerville text-[9px] tracking-[0.32em] uppercase text-muted font-medium mb-3">
+            Tävling · Grand Hotel Lysekil
           </p>
-          <h1 className="font-serif text-[32px] text-primary leading-tight tracking-tight">
-            Vinn frukost
+          <h1 className="font-script text-[52px] leading-tight text-primary">
+            Vinn en Hotellfrukost
           </h1>
-          <div className="mt-3 mb-4 flex justify-center">
+          <div className="mt-2 mb-4 flex justify-center">
             <div className="w-8 h-px bg-accent" />
           </div>
           <p className="text-[12.5px] text-granite leading-relaxed">
@@ -182,7 +186,7 @@ export default function TavlingPage() {
           </p>
         </form>
 
-        <p className="mt-6 text-center text-[10px] text-granite-light leading-relaxed">
+        <p className="mt-6 text-center font-baskerville text-[9.5px] tracking-[0.22em] uppercase text-muted">
           Grand Hotel Lysekil · Kungsgatan 36 · Lysekil
         </p>
       </div>
