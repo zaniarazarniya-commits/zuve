@@ -37,6 +37,8 @@
   --color-muted: var(--muted);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-serif);
+  --font-baskerville: var(--font-baskerville);
+  --font-script: var(--font-script);
 }
 
 body {
@@ -50,6 +52,14 @@ body {
 /* Font-serif fallback */
 .font-serif {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+.font-baskerville {
+  font-family: var(--font-baskerville), "Baskerville Old Face", Baskerville, Georgia, serif;
+}
+
+.font-script {
+  font-family: var(--font-script), "Vivaldi", cursive;
 }
 
 /* ============================================================
