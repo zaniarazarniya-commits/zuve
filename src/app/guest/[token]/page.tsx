@@ -6,6 +6,7 @@ import { CheckIcon } from "@/components/icons";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { upsells, recommendations } from "@/lib/guest-data";
 import type { Booking } from "@/types/booking";
+import { GrandLogo, GrandMonogram, GrandSwash } from "@/components/GrandLogo";
 
 // ============================================================
 // Modal-context (oförändrat)
@@ -83,15 +84,10 @@ function WelcomeScreen({
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col items-center justify-between bg-background px-8 pt-16 pb-12 ${isExiting ? "reveal-out" : ""}`}>
-      {/* Top crest */}
-      <div className="flex flex-col items-center gap-2.5 reveal-in" style={{ animationDelay: "0.2s" }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" strokeWidth="1.2">
-          <path d="M12 2 L13.5 9 L21 10 L15.5 14.5 L17 21 L12 17 L7 21 L8.5 14.5 L3 10 L10.5 9 Z" />
-        </svg>
-        <p className="font-serif text-[13px] tracking-[0.32em] uppercase text-primary font-medium">
-          Grand Hotel Lysekil
-        </p>
-        <p className="text-[9.5px] tracking-[0.24em] uppercase text-muted">
+      {/* Top logo */}
+      <div className="flex flex-col items-center gap-3 reveal-in" style={{ animationDelay: "0.2s" }}>
+        <GrandLogo variant="light" width={130} />
+        <p className="text-[9px] tracking-[0.28em] uppercase text-muted font-medium">
           Est. 1934 · Bohuslän
         </p>
       </div>
@@ -99,15 +95,20 @@ function WelcomeScreen({
       {/* Center */}
       <div className="flex flex-col items-center text-center -mt-10">
         <div className="w-8 h-px bg-accent mb-8 line-reveal" style={{ animationDelay: "0.5s" }} />
-        <p className="font-serif italic text-lg text-granite mb-3.5 font-light reveal-in" style={{ animationDelay: "0.8s" }}>
+        <p className="font-script text-[42px] leading-none text-granite mb-1 reveal-in" style={{ animationDelay: "0.8s" }}>
           Välkommen
         </p>
-        <h1 className="font-serif text-[64px] leading-none text-primary tracking-tight reveal-in" style={{ animationDelay: "1.1s" }}>
+        <h1 className="font-baskerville text-[58px] leading-none text-primary tracking-tight reveal-in" style={{ animationDelay: "1.1s" }}>
           {firstName}
         </h1>
         <p className="text-xs text-muted mt-5 tracking-wide reveal-in" style={{ animationDelay: "1.4s" }}>
           Vi ser fram emot din vistelse
         </p>
+      </div>
+
+      {/* Swash */}
+      <div className="flex justify-center reveal-in" style={{ animationDelay: "1.5s" }}>
+        <GrandSwash gold width={72} />
       </div>
 
       {/* CTA */}
@@ -779,7 +780,7 @@ function ExploreScreen({ token }: { token: string; booking: Booking }) {
         <TabContent token={token} activeTab={activeTab} />
 
         <footer className="pt-10 pb-4 text-center flex flex-col items-center gap-1.5">
-          <div className="w-6 h-px bg-accent mb-2" />
+          <GrandMonogram size={36} className="mb-2 opacity-70" />
           <p className="text-[9.5px] tracking-[0.3em] uppercase text-muted font-medium">
             Receptionen
           </p>
@@ -821,15 +822,9 @@ function MainScreen({
         {activeView === "booking" && (
           <>
             {/* Top bar */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-sand/40">
-              <button className="w-8 h-8 flex items-center justify-center text-primary" aria-label="Meny">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                  <path d="M3 6h18M3 12h18M3 18h18" />
-                </svg>
-              </button>
-              <p className="font-serif text-[12px] tracking-[0.28em] uppercase text-primary font-medium">
-                Grand Hotel Lysekil
-              </p>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-sand/40">
+              <div className="w-8" />
+              <GrandLogo variant="compact" width={90} className="opacity-90" />
               <div className="w-8" />
             </div>
 
