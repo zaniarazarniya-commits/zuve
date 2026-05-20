@@ -2,7 +2,7 @@
 
 import QRCode from "react-qr-code";
 
-const TAVLING_URL = "https://grandhotellysekil.se/tavling";
+const TAVLING_URL = "https://guest.grandhotellysekil.se/tavling";
 
 export default function FlyerPage() {
   return (
