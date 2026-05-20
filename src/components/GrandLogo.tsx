@@ -24,6 +24,7 @@ export function GrandLogo({ variant = "light", className = "", width = 160 }: Gr
       width={width}
       height={height}
       className={`object-contain select-none ${className}`}
+      style={variant !== "gold-on-dark" ? { mixBlendMode: "multiply" } : undefined}
       draggable={false}
     />
   );
@@ -39,6 +40,7 @@ export function GrandMonogram({ className = "", size = 48 }: { className?: strin
       width={size}
       height={size}
       className={`object-contain select-none ${className}`}
+      style={{ mixBlendMode: "multiply" }}
       draggable={false}
     />
   );

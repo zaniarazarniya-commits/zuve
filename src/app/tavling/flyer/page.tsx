@@ -116,23 +116,12 @@ export default function FlyerPage() {
           <div className="flyer-border-inner" />
 
           {/* Logotyp */}
-          <div style={{ marginTop: 8, marginBottom: 8 }}>
+          <div style={{ marginTop: 8, marginBottom: 14 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/Logos/Gran Hotel Lysekil_logo.png"
               alt="Grand Hotel Lysekil"
-              style={{ width: 140, display: "block", margin: "0 auto" }}
-            />
-          </div>
-
-          {/* Svan-dekor */}
-          <div style={{ margin: "4px 0 12px" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/Logos/grand logga del.png"
-              alt=""
-              aria-hidden="true"
-              style={{ width: 60, display: "block", margin: "0 auto", opacity: 0.5 }}
+              style={{ width: 150, display: "block", margin: "0 auto", mixBlendMode: "multiply" }}
             />
           </div>
 
@@ -181,7 +170,7 @@ export default function FlyerPage() {
             }}>
               Så här deltar du
             </p>
-            <ol style={{ margin: 0, padding: "0 0 0 18px", color: "#1a3a4a" }}>
+            <ol style={{ margin: 0, padding: 0, listStyle: "none", color: "#1a3a4a" }}>
               {[
                 "Skanna QR-koden nedan med din telefon",
                 "Fyll i dina uppgifter på sidan som öppnas",
@@ -189,7 +178,9 @@ export default function FlyerPage() {
               ].map((step, i) => (
                 <li key={i} className="f-serif" style={{
                   fontSize: 12, lineHeight: 1.75, color: "#1a3a4a",
+                  textAlign: "center",
                 }}>
+                  <span style={{ color: "#c9a96e", marginRight: 6 }}>{i + 1}.</span>
                   {step}
                 </li>
               ))}
@@ -200,7 +191,7 @@ export default function FlyerPage() {
           <div className="qr-box">
             <QRCode
               value={TAVLING_URL}
-              size={136}
+              size={185}
               bgColor="#ffffff"
               fgColor="#1a3a4a"
               style={{ display: "block" }}
