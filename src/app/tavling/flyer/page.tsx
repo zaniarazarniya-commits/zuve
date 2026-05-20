@@ -40,27 +40,27 @@ export default function FlyerPage() {
         .print-btn:hover { opacity: 0.85; }
 
         .flyer-page {
-          width: 210mm;
-          min-height: 297mm;
+          width: 148mm;
+          min-height: 210mm;
           background: #f4f1ec;
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 16mm 18mm 14mm;
+          padding: 11mm 13mm 10mm;
           box-shadow: 0 8px 40px rgba(0,0,0,0.18);
         }
 
         .flyer-border {
           position: absolute;
-          top: 9mm; left: 9mm; right: 9mm; bottom: 9mm;
+          top: 6mm; left: 6mm; right: 6mm; bottom: 6mm;
           border: 1px solid #c9a96e;
           pointer-events: none;
         }
 
         .flyer-border-inner {
           position: absolute;
-          top: 11mm; left: 11mm; right: 11mm; bottom: 11mm;
+          top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
           border: 0.5px solid rgba(201,169,110,0.4);
           pointer-events: none;
         }
@@ -73,20 +73,20 @@ export default function FlyerPage() {
           background: white;
           border: 1px solid rgba(212,200,184,0.8);
           border-radius: 4px;
-          padding: 18px 24px;
+          padding: 13px 17px;
           width: 100%;
-          max-width: 340px;
-          margin-bottom: 20px;
+          max-width: 240px;
+          margin-bottom: 14px;
           box-shadow: 0 2px 12px rgba(26,58,74,0.06);
         }
 
         .qr-box {
           background: white;
-          padding: 14px;
+          padding: 10px;
           border-radius: 4px;
           border: 1px solid rgba(212,200,184,0.6);
           box-shadow: 0 2px 12px rgba(26,58,74,0.06);
-          margin-bottom: 10px;
+          margin-bottom: 7px;
         }
 
         @media print {
@@ -94,14 +94,14 @@ export default function FlyerPage() {
           .print-btn { display: none !important; }
           .flyer-wrap { padding: 0; background: white; min-height: unset; }
           .flyer-page {
-            width: 210mm;
-            min-height: 297mm;
+            width: 148mm;
+            min-height: 210mm;
             box-shadow: none;
             page-break-after: always;
           }
         }
 
-        @media screen and (max-width: 800px) {
+        @media screen and (max-width: 600px) {
           .flyer-page { width: 100%; min-height: unset; }
         }
       `}</style>
@@ -116,57 +116,57 @@ export default function FlyerPage() {
           <div className="flyer-border-inner" />
 
           {/* Logotyp */}
-          <div style={{ marginTop: 8, marginBottom: 14 }}>
+          <div style={{ marginTop: 6, marginBottom: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/Logos/Gran Hotel Lysekil_logo.png"
               alt="Grand Hotel Lysekil"
-              style={{ width: 150, display: "block", margin: "0 auto", mixBlendMode: "multiply" }}
+              style={{ width: 108, display: "block", margin: "0 auto", mixBlendMode: "multiply" }}
             />
           </div>
 
           {/* Est. tag */}
           <p className="f-baskerville" style={{
-            fontSize: 8, letterSpacing: "0.3em", textTransform: "uppercase",
-            color: "#8a7f72", margin: "0 0 12px", textAlign: "center",
+            fontSize: 7, letterSpacing: "0.28em", textTransform: "uppercase",
+            color: "#8a7f72", margin: "0 0 9px", textAlign: "center",
           }}>
             Est. 1934 · Bohuslän
           </p>
 
           {/* Guldlinje */}
-          <div style={{ width: 44, height: 1, background: "#c9a96e", margin: "0 auto 20px" }} />
+          <div style={{ width: 36, height: 1, background: "#c9a96e", margin: "0 auto 14px" }} />
 
           {/* Tävling-tag */}
           <p className="f-baskerville" style={{
-            fontSize: 8, letterSpacing: "0.32em", textTransform: "uppercase",
-            color: "#c9a96e", margin: "0 0 4px", textAlign: "center",
+            fontSize: 7, letterSpacing: "0.3em", textTransform: "uppercase",
+            color: "#c9a96e", margin: "0 0 3px", textAlign: "center",
           }}>
             Tävling
           </p>
 
           {/* Rubrik */}
           <h1 className="f-script" style={{
-            fontSize: 68, color: "#1a3a4a", margin: "0 0 4px",
+            fontSize: 50, color: "#1a3a4a", margin: "0 0 3px",
             textAlign: "center", lineHeight: 1.1,
           }}>
             Vinn en Hotellfrukost
           </h1>
 
           <p className="f-serif" style={{
-            fontSize: 11.5, fontStyle: "italic", color: "#5a5c5e",
-            margin: "0 0 20px", textAlign: "center", lineHeight: 1.5,
+            fontSize: 10, fontStyle: "italic", color: "#5a5c5e",
+            margin: "0 0 14px", textAlign: "center", lineHeight: 1.5,
           }}>
             för en person på Grand Hotel Lysekil
           </p>
 
           {/* Guldlinje */}
-          <div style={{ width: 44, height: 1, background: "#c9a96e", margin: "0 auto 24px" }} />
+          <div style={{ width: 36, height: 1, background: "#c9a96e", margin: "0 auto 16px" }} />
 
           {/* Instruktionsbox */}
           <div className="instruction-box">
             <p className="f-baskerville" style={{
-              fontSize: 8, letterSpacing: "0.24em", textTransform: "uppercase",
-              color: "#8a7f72", margin: "0 0 12px", textAlign: "center",
+              fontSize: 7, letterSpacing: "0.22em", textTransform: "uppercase",
+              color: "#8a7f72", margin: "0 0 9px", textAlign: "center",
             }}>
               Så här deltar du
             </p>
@@ -177,10 +177,10 @@ export default function FlyerPage() {
                 "Vi lottar bland alla deltagare – lycka till!",
               ].map((step, i) => (
                 <li key={i} className="f-serif" style={{
-                  fontSize: 12, lineHeight: 1.75, color: "#1a3a4a",
+                  fontSize: 10.5, lineHeight: 1.7, color: "#1a3a4a",
                   textAlign: "center",
                 }}>
-                  <span style={{ color: "#c9a96e", marginRight: 6 }}>{i + 1}.</span>
+                  <span style={{ color: "#c9a96e", marginRight: 5 }}>{i + 1}.</span>
                   {step}
                 </li>
               ))}
@@ -191,7 +191,7 @@ export default function FlyerPage() {
           <div className="qr-box">
             <QRCode
               value={TAVLING_URL}
-              size={185}
+              size={130}
               bgColor="#ffffff"
               fgColor="#1a3a4a"
               style={{ display: "block" }}
@@ -199,27 +199,27 @@ export default function FlyerPage() {
           </div>
 
           <p className="f-baskerville" style={{
-            fontSize: 7.5, letterSpacing: "0.18em", color: "#9da0a3",
-            margin: "0 0 28px", textAlign: "center",
+            fontSize: 6.5, letterSpacing: "0.16em", color: "#9da0a3",
+            margin: "0 0 16px", textAlign: "center",
           }}>
             {TAVLING_URL}
           </p>
 
           {/* Monogram footer */}
-          <div style={{ marginTop: "auto", marginBottom: 10 }}>
+          <div style={{ marginTop: "auto", marginBottom: 7 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/Logos/Kopia av GRAND MARKETING PLANERING.png"
               alt=""
               aria-hidden="true"
-              style={{ width: 34, display: "block", margin: "0 auto", opacity: 0.4 }}
+              style={{ width: 24, display: "block", margin: "0 auto", opacity: 0.4 }}
             />
           </div>
 
           {/* Adresstext */}
           <p className="f-baskerville" style={{
-            fontSize: 7.5, letterSpacing: "0.22em", textTransform: "uppercase",
-            color: "#9da0a3", margin: "6px 0 0", textAlign: "center",
+            fontSize: 6.5, letterSpacing: "0.2em", textTransform: "uppercase",
+            color: "#9da0a3", margin: "5px 0 0", textAlign: "center",
           }}>
             Grand Hotel Lysekil · Kungsgatan 36 · 453 33 Lysekil · 0523–61 10 00
           </p>
