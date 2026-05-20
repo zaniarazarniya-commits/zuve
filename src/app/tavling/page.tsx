@@ -62,7 +62,7 @@ export default function TavlingPage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
         <div className="w-full max-w-[340px] text-center reveal-in">
           <div className="mb-6 flex justify-center">
-            <GrandLogo variant="compact" width={100} />
+            <GrandLogo variant="light" width={140} />
           </div>
           <GrandMonogram size={40} className="mx-auto mb-4 opacity-60" />
           <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
@@ -86,10 +86,9 @@ export default function TavlingPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
       <div className="w-full max-w-[340px]">
         <div className="text-center mb-10">
-          <div className="flex justify-center mb-6">
-            <GrandLogo variant="compact" width={150} />
+          <div className="flex justify-center mb-5">
+            <GrandLogo variant="light" width={200} />
           </div>
-          <GrandSwash gold width={60} className="mx-auto mb-4" />
           <p className="font-baskerville text-[9px] tracking-[0.32em] uppercase text-muted font-medium mb-3">
             Tävling · Grand Hotel Lysekil
           </p>

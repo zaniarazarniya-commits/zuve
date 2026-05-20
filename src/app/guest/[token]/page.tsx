@@ -193,7 +193,7 @@ function DetailsFormScreen({
       {/* Header */}
       <div className="px-7 pt-10 pb-6 max-w-lg mx-auto w-full">
         <div className="flex justify-center mb-6">
-          <GrandLogo variant="compact" width={100} />
+          <GrandLogo variant="light" width={140} />
         </div>
         <div className="w-8 h-px bg-accent mx-auto mb-6" />
         <p className="text-[9.5px] tracking-[0.3em] uppercase text-accent font-medium mb-3">
