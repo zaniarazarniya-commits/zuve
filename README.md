@@ -75,6 +75,42 @@ I Sirvoy, gå till **Settings → Integrations → Webhooks**:
    - Lägga till tillval (frukost, blommor, etc.)
    - Utforska aktiviteter och restauranger i Lysekil
 
+## Gruppincheckning
+
+För företagsgrupper som checkar in många gäster samtidigt. Gästen skannar en
+QR-kod, väljer sitt namn ur listan, fyller i e-post och telefon och får sitt
+rumsnummer direkt. Ingen pappersblankett i receptionen.
+
+**Sidor**
+
+| Sida | Vem |
+|---|---|
+| `/incheckning/<slug>` | Gästen — namnlista, formulär, rumsnummer |
+| `/incheckning/<slug>/flyer` | Utskrivbar A5-skylt med QR-koden |
+| `/admin/incheckning/<slug>` | Receptionen — vilka som checkat in, Excel-export |
+
+**Lägga upp en ny grupp**
+
+1. Lägg till gruppen i `src/lib/group-checkin-data.ts` (deltagare, rum, datum).
+   Slugen ligger i URL:en och ska vara ogissbar — lägg på några slumpmässiga
+   tecken.
+2. Deploya. Öppna `/incheckning/<slug>/flyer`, skriv ut och ställ i lobbyn.
+3. Under incheckningen: håll `/admin/incheckning/<slug>` öppen i receptionen.
+   Vyn uppdateras automatiskt var 15:e sekund.
+
+**Att känna till**
+
+- Rumsnumren skickas aldrig med i namnlistan. Ett rum avslöjas bara för den som
+  just fyllt i sina uppgifter. Därför importeras `group-checkin-data.ts` bara av
+  API-routes, aldrig av en klientkomponent.
+- Använd den gästvänliga rumstypen i `roomType`, inte Sirvoys interna rumsnamn —
+  de innehåller anteckningar som inte ska visas för gästen.
+- Varje namn kan bara checkas in en gång. Om någon råkar välja fel namn frigör
+  receptionen det med "Ta bort" i adminvyn.
+- `/admin/incheckning/<slug>` har ingen inloggning, precis som `/admin/tavling`.
+  Skyddet ligger i att slugen är ogissbar. Dela inte adminlänken utanför
+  personalen.
+
 ## Redigera innehåll
 
 Allt redigerbart innehåll (tillval, aktiviteter, restauranger) finns i:
