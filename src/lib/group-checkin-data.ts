@@ -47,6 +47,11 @@ export type CheckinGroup = {
   /** ISO-datum, t.ex. "2026-09-03". */
   checkIn: string
   checkOut: string
+  /**
+   * Valfri rad som visas för gästen ovanför namnlistan. Använd när listan
+   * behöver en förklaring, t.ex. att namnen är ofullständiga i bokningen.
+   */
+  note?: string
   guests: GroupGuest[]
 }
 
@@ -89,7 +94,55 @@ const nokalux: CheckinGroup = {
   ],
 }
 
-export const checkinGroups: CheckinGroup[] = [nokalux]
+// ------------------------------------------------------------
+// Nokalux, natt två (fre 4 sep → lör 5 sep).
+//
+// Bokningen omfattar 37 gäster, men bara de 21 nyanlända står här.
+// De 16 som bor kvar från torsdagen behåller sina rum och nycklar och
+// ska inte checka in en gång till — de finns därför inte i listan.
+//
+// ⚠️ Namnen nedan är avkortade i Sirvoy och står här precis som de visas
+// där. Vissa personer har bara förnamn, andra förnamn plus en initial.
+// Har du fullständiga namn: skriv över `name`, men rör inte `key`.
+//
+// ⚠️ Bokningen anger 37 gäster. 16 kvarboende + de 20 namn som går att
+// utläsa blir 36 — någonstans finns en person till, sannolikt i rum 213
+// som är ett litet familjerum för tre. Lägg till raden här när namnet är
+// känt. Fram till dess hänvisas den personen till receptionen, vilket
+// sidan redan säger till den som inte hittar sitt namn.
+// ------------------------------------------------------------
+const nokaluxFredag: CheckinGroup = {
+  slug: "nokalux-fredag-r8t2xq",
+  company: "Nokalux",
+  bookingId: "61112",
+  checkIn: "2026-09-04",
+  checkOut: "2026-09-05",
+  note: "Namnen står som i bokningen — vissa bara med förnamn. Bor du kvar sedan i går behåller du ditt rum och behöver inte göra något här.",
+  guests: [
+    { key: "gustav", name: "Gustav", room: "110", roomType: "Familjerum" },
+    { key: "jerry", name: "Jerry", room: "110", roomType: "Familjerum" },
+    { key: "rebecca-g", name: "Rebecca G", room: "202", roomType: "Dubbelrum" },
+    { key: "rebecka-n", name: "Rebecka N", room: "202", roomType: "Dubbelrum" },
+    { key: "pemika", name: "Pemika", room: "204", roomType: "Dubbelrum" },
+    { key: "sigita", name: "Sigita", room: "204", roomType: "Dubbelrum" },
+    { key: "hanne", name: "Hanne", room: "212", roomType: "Small twin" },
+    { key: "therese", name: "Therese", room: "212", roomType: "Small twin" },
+    { key: "helene", name: "Helene", room: "213", roomType: "Dubbelrum twin" },
+    { key: "kajsa", name: "Kajsa", room: "213", roomType: "Dubbelrum twin" },
+    { key: "annika", name: "Annika", room: "302", roomType: "Dubbelrum med havsutsikt" },
+    { key: "lena-s", name: "Lena S", room: "302", roomType: "Dubbelrum med havsutsikt" },
+    { key: "marie-j", name: "Marie J", room: "303", roomType: "Dubbelrum" },
+    { key: "maja", name: "Maja", room: "303", roomType: "Dubbelrum" },
+    { key: "lennie", name: "Lennie", room: "304", roomType: "Dubbelrum twin" },
+    { key: "fredrik-e", name: "Fredrik E", room: "304", roomType: "Dubbelrum twin" },
+    { key: "asa-o", name: "Åsa O", room: "400", roomType: "Svit med kök" },
+    { key: "pia", name: "Pia", room: "400", roomType: "Svit med kök" },
+    { key: "mona", name: "Mona", room: "500", roomType: "Svit" },
+    { key: "ase-p", name: "Åse P", room: "500", roomType: "Svit" },
+  ],
+}
+
+export const checkinGroups: CheckinGroup[] = [nokalux, nokaluxFredag]
 
 // ============================================================
 // HJÄLPFUNKTIONER
