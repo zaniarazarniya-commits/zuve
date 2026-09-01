@@ -166,7 +166,7 @@ export function FlyerView({
               textAlign: "center",
             }}
           >
-            Est. 1934 · Bohuslän
+            Bohuslän
           </p>
 
           <div style={{ width: 36, height: 1, background: "#c9a96e", margin: "0 auto 14px" }} />

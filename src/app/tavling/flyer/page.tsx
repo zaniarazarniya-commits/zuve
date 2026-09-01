@@ -125,12 +125,12 @@ export default function FlyerPage() {
             />
           </div>
 
-          {/* Est. tag */}
+          {/* Ortstagg */}
           <p className="f-baskerville" style={{
             fontSize: 7, letterSpacing: "0.28em", textTransform: "uppercase",
             color: "#8a7f72", margin: "0 0 9px", textAlign: "center",
           }}>
-            Est. 1934 · Bohuslän
+            Bohuslän
           </p>
 
           {/* Guldlinje */}
