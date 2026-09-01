@@ -20,6 +20,16 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Gruppincheckningen innehåller gästernas namn och ska
+        // aldrig hamna i en sökmotor.
+        source: "/incheckning/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
     ]
   },
 };
