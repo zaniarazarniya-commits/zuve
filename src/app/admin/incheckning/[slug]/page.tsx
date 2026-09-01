@@ -22,6 +22,9 @@ type Entry = {
   phone: string;
   allergies: string | null;
   second_night: boolean | null;
+  stripe_customer_id: string | null;
+  card_brand: string | null;
+  card_last4: string | null;
   created_at: string;
 };
 
@@ -286,7 +289,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Natt 2", "Tid", ""].map((h) => (
+                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Natt 2", "Kort", "Tid", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -325,6 +328,15 @@ export default function AdminGroupCheckinPage() {
                         <span className="text-success font-medium">Stannar</span>
                       ) : (
                         <span className="text-granite">Åker</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {e.card_last4 ? (
+                        <span className="text-success font-medium">
+                          {e.card_brand ?? "kort"} ••{e.card_last4}
+                        </span>
+                      ) : (
+                        <span className="text-granite-light">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite-light">

@@ -98,6 +98,27 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 3. Under incheckningen: håll `/admin/incheckning/<slug>` öppen i receptionen.
    Vyn uppdateras automatiskt var 15:e sekund.
 
+**Minibarkort (Stripe)**
+
+Efter att gästen fått sitt rumsnummer kan hen registrera ett kort som garanti
+för minibaren. Kortet sparas hos Stripe med en SetupIntent — inget debiteras vid
+incheckningen. Debiteringen görs manuellt i Stripes dashboard vid utcheckning,
+eftersom någon ändå måste titta i minibaren.
+
+Kräver `STRIPE_SECRET_KEY` i miljövariablerna. Saknas den är knappen avstängd
+och incheckningen fungerar precis som vanligt — kortet får aldrig blockera en
+incheckning.
+
+- Kortuppgifter passerar aldrig servern och lagras aldrig i Supabase. Vi sparar
+  bara `stripe_customer_id`, `stripe_payment_method_id`, korttyp och fyra sista
+  siffror. **Lägg aldrig till kolumner för kortnummer, CVC eller giltighetstid.**
+- Villkoren gästen godkänner står i `src/lib/minibar-mandate.ts` och sparas
+  ordagrant på raden tillsammans med tidpunkten. Ändrar du texten: höj
+  `MINIBAR_MANDATE_VERSION` och skriv inte om gamla rader.
+- Kortsteget ligger efter rumsnumret, aldrig före.
+- Använd ett eget Stripe-konto, inte det Sirvoy administrerar — Stripe
+  rekommenderar det själva i dashboarden.
+
 **Att känna till**
 
 - Sätt `secondNight` på en grupp som sträcker sig över flera nätter. Gästen

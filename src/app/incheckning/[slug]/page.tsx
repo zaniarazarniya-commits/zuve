@@ -15,6 +15,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { GrandLogo, GrandSwash, GrandMonogram } from "@/components/GrandLogo";
+import { MINIBAR_MANDATE_TEXT } from "@/lib/minibar-mandate";
 
 type Guest = { key: string; name: string; claimed: boolean };
 type GroupMeta = {
@@ -69,6 +70,8 @@ export default function GroupCheckinPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
 
   // --- Hämta namnlistan ---
   useEffect(() => {
@@ -106,6 +109,31 @@ export default function GroupCheckinPage() {
   }, [guests, query]);
 
   const remaining = guests.filter((g) => !g.claimed).length;
+
+  // Skickar gästen till Stripe för att spara kortet. Kortuppgifterna
+  // fylls i hos Stripe och passerar aldrig vår server.
+  async function handleRegisterCard() {
+    if (!selected) return;
+    setCardError(null);
+    setCardLoading(true);
+    try {
+      const res = await fetch(`/api/incheckning/${slug}/kort`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guest_key: selected.key }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setCardError(data.error ?? "Kunde inte öppna kortregistreringen.");
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setCardError("Kunde inte öppna kortregistreringen.");
+    } finally {
+      setCardLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -213,7 +241,33 @@ export default function GroupCheckinPage() {
             </p>
           )}
 
-          <p className="mt-4 text-[11px] text-granite-light leading-relaxed">
+          {/* Minibarkort — efter rumsnumret, aldrig före. Krånglar kortet
+              ska gästen ändå ha checkat in och kunna hämta sina nycklar. */}
+          <div className="mt-8 rounded-[4px] border border-sand bg-white px-5 py-5 text-left">
+            <p className={labelCls}>Minibar</p>
+            <p className="mt-3 text-[11.5px] text-granite leading-relaxed">
+              {MINIBAR_MANDATE_TEXT}
+            </p>
+            {cardError && (
+              <p role="alert" className="mt-3 text-[11.5px] text-red-600 leading-snug">
+                {cardError}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={handleRegisterCard}
+              disabled={cardLoading}
+              className="mt-4 w-full py-3 rounded-[4px] bg-primary text-white text-[10px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
+            >
+              {cardLoading ? "Öppnar…" : "Registrera kort"}
+            </button>
+            <p className="mt-3 text-[10px] text-granite-light leading-relaxed">
+              Frivilligt. Hoppar du över det löser vi minibaren i receptionen i
+              stället. Kortet hanteras av Stripe.
+            </p>
+          </div>
+
+          <p className="mt-6 text-[11px] text-granite-light leading-relaxed">
             Ta gärna en skärmbild — den här sidan går inte att öppna igen.
           </p>
 
