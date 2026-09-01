@@ -103,6 +103,13 @@ export async function POST(
     const session = await stripe.checkout.sessions.create({
       mode: "setup",
       customer: customerId,
+      // I setup-läge måste antingen payment_method_types eller currency
+      // anges — utan dem vet Stripe inte vilka betalsätt som är möjliga
+      // och avvisar anropet. "card" täcker även Apple Pay och Google Pay,
+      // som visas som kort i Checkout, och är dessutom det enda betalsätt
+      // som går att dra off-session i efterhand.
+      payment_method_types: ["card"],
+      currency: "sek",
       // usage: off_session gör att 3D Secure sker nu, medan gästen är
       // närvarande, i stället för att fälla debiteringen efter utcheckning.
       setup_intent_data: {
@@ -144,7 +151,18 @@ export async function POST(
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    console.error("[Kort] Stripe-fel:", err instanceof Error ? err.message : "okänt fel")
+    // Stripes fel bär type och code utöver meddelandet. Logga alla tre —
+    // annars går det inte att skilja en felaktig nyckel från ett avvisat
+    // anrop när något krånglar mitt i en incheckning.
+    const detail =
+      err && typeof err === "object"
+        ? {
+            type: (err as { type?: unknown }).type,
+            code: (err as { code?: unknown }).code,
+            message: (err as { message?: unknown }).message,
+          }
+        : { message: String(err) }
+    console.error("[Kort] Stripe-fel:", detail)
     return NextResponse.json(
       { error: "Kunde inte starta kortregistreringen. Vänd dig till receptionen." },
       { status: 502 }
