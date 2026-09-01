@@ -88,7 +88,7 @@ function WelcomeScreen({
       <div className="flex flex-col items-center gap-3 reveal-in" style={{ animationDelay: "0.2s" }}>
         <GrandLogo variant="light" width={130} />
         <p className="text-[9px] tracking-[0.28em] uppercase text-muted font-medium">
-          Est. 1934 · Bohuslän
+          Bohuslän
         </p>
       </div>
 
