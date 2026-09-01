@@ -59,6 +59,7 @@ export async function GET(
       company: group.company,
       checkIn: group.checkIn,
       checkOut: group.checkOut,
+      note: group.note ?? null,
     },
     guests: group.guests.map((g) => ({
       key: g.key,

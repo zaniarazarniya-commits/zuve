@@ -17,7 +17,12 @@ import { useParams } from "next/navigation";
 import { GrandLogo, GrandSwash, GrandMonogram } from "@/components/GrandLogo";
 
 type Guest = { key: string; name: string; claimed: boolean };
-type GroupMeta = { company: string; checkIn: string; checkOut: string };
+type GroupMeta = {
+  company: string;
+  checkIn: string;
+  checkOut: string;
+  note: string | null;
+};
 type Confirmation = { name: string; room: string; roomType: string; floor: number | null };
 
 const inputCls =
@@ -305,6 +310,9 @@ export default function GroupCheckinPage() {
           <p className="text-[12.5px] text-granite leading-relaxed">
             Välj ditt namn i listan så visar vi vilket rum du bor i.
           </p>
+          {group.note && (
+            <p className="mt-3 text-[11.5px] text-muted leading-relaxed">{group.note}</p>
+          )}
         </div>
 
         <input
