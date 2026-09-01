@@ -19,6 +19,7 @@ type Entry = {
   room_number: string;
   email: string;
   phone: string;
+  allergies: string | null;
   created_at: string;
 };
 
@@ -144,6 +145,7 @@ export default function AdminGroupCheckinPage() {
 
   const done = entries.length;
   const pct = group.total > 0 ? Math.round((done / group.total) * 100) : 0;
+  const withAllergies = entries.filter((e) => e.allergies);
 
   return (
     <main className="min-h-screen bg-background px-6 py-12">
@@ -214,6 +216,24 @@ export default function AdminGroupCheckinPage() {
           </button>
         </div>
 
+        {/* Allergier samlat — det köket behöver, utan att läsa hela tabellen */}
+        {withAllergies.length > 0 && (
+          <div className="mb-10 rounded-[4px] border border-accent/40 bg-white px-5 py-4">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
+              Allergier och specialkost ({withAllergies.length})
+            </p>
+            <ul className="flex flex-col gap-1.5">
+              {withAllergies.map((e) => (
+                <li key={e.id} className="text-[12.5px] text-foreground leading-relaxed">
+                  <span className="text-granite">Rum {e.room_number} · {e.guest_name}</span>
+                  {" — "}
+                  <span className="text-accent font-medium">{e.allergies}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Incheckade */}
         <h2 className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
           Incheckade
@@ -225,7 +245,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "E-post", "Telefon", "Tid", ""].map((h) => (
+                  {["Rum", "Namn", "E-post", "Telefon", "Allergier", "Tid", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -247,6 +267,13 @@ export default function AdminGroupCheckinPage() {
                     <td className="px-4 py-3 whitespace-nowrap">{e.guest_name}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sea">{e.email}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite">{e.phone}</td>
+                    <td className="px-4 py-3 max-w-[220px]">
+                      {e.allergies ? (
+                        <span className="text-accent font-medium">{e.allergies}</span>
+                      ) : (
+                        <span className="text-granite-light">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite-light">
                       {formatTime(e.created_at)}
                     </td>

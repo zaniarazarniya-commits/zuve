@@ -13,7 +13,7 @@
 import { NextResponse } from "next/server"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
-import { isValidEmail, normalizeAndValidatePhone } from "@/lib/validation"
+import { isValidEmail, normalizeAndValidatePhone, sanitizeNotes } from "@/lib/validation"
 import { getGroup, getGroupGuest, floorFromRoom } from "@/lib/group-checkin-data"
 
 const READ_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 60 }
@@ -92,7 +92,12 @@ export async function POST(
     return NextResponse.json({ error: "Okänd incheckningslänk." }, { status: 404 })
   }
 
-  let body: { guest_key?: unknown; email?: unknown; phone?: unknown }
+  let body: {
+    guest_key?: unknown
+    email?: unknown
+    phone?: unknown
+    allergies?: unknown
+  }
   try {
     body = await request.json()
   } catch {
@@ -115,6 +120,9 @@ export async function POST(
     return NextResponse.json({ error: "Ange ett giltigt telefonnummer." }, { status: 400 })
   }
 
+  // Frivilligt fält — sanitizeNotes ger null för tom text.
+  const allergies = sanitizeNotes(body.allergies)
+
   const supabase = getSupabaseServiceClient()
   const { error } = await supabase.from("group_checkin_entries").insert({
     group_slug: slug,
@@ -123,6 +131,7 @@ export async function POST(
     room_number: guest.room,
     email,
     phone,
+    allergies,
   })
 
   if (error) {

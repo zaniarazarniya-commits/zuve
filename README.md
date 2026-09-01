@@ -100,6 +100,10 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 
 **Att känna till**
 
+- Gästen kan ange allergier eller specialkost när hen checkar in. Fältet är
+  frivilligt. Receptionens vy visar alla allergier samlat högst upp, så att
+  köket slipper leta i tabellen, och de följer med i Excel-exporten. Detta är
+  hälsodata — använd det för måltiderna och spara det inte längre än nödvändigt.
 - Rumsnumren skickas aldrig med i namnlistan. Ett rum avslöjas bara för den som
   just fyllt i sina uppgifter. Därför importeras `group-checkin-data.ts` bara av
   API-routes, aldrig av en klientkomponent.

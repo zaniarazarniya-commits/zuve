@@ -58,6 +58,7 @@ export default function GroupCheckinPage() {
   const [selected, setSelected] = useState<Guest | null>(null);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [allergies, setAllergies] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
@@ -108,7 +109,7 @@ export default function GroupCheckinPage() {
       const res = await fetch(`/api/incheckning/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guest_key: selected.key, email, phone }),
+        body: JSON.stringify({ guest_key: selected.key, email, phone, allergies }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -184,6 +185,12 @@ export default function GroupCheckinPage() {
             får du dina nycklar. Du behöver inte fylla i någon blankett.
           </p>
 
+          {allergies.trim() !== "" && (
+            <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
+              Vi har noterat: <strong>{allergies.trim()}</strong>
+            </p>
+          )}
+
           <p className="mt-4 text-[11px] text-granite-light leading-relaxed">
             Ta gärna en skärmbild — den här sidan går inte att öppna igen.
           </p>
@@ -254,6 +261,24 @@ export default function GroupCheckinPage() {
                 required
                 className={inputCls}
               />
+            </div>
+
+            {/* Allergier — frivilligt, men viktigt för köket */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="allergies" className={labelCls}>
+                Allergier eller specialkost <span className="normal-case tracking-normal text-granite-light">(valfritt)</span>
+              </label>
+              <textarea
+                id="allergies"
+                rows={2}
+                value={allergies}
+                onChange={(e) => setAllergies(e.target.value)}
+                placeholder="T.ex. gluten, laktos, nötter"
+                className={`${inputCls} resize-none`}
+              />
+              <p className="text-[10px] text-granite-light leading-relaxed">
+                Lämna tomt om du inte har några. Uppgiften går till köket.
+              </p>
             </div>
 
             {error && (
