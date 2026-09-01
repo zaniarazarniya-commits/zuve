@@ -52,6 +52,19 @@ export type CheckinGroup = {
    * behöver en förklaring, t.ex. att namnen är ofullständiga i bokningen.
    */
   note?: string
+  /**
+   * Fråga gästen om hen stannar ytterligare en natt. Sätt bara för grupper
+   * som sträcker sig över flera nätter — då måste gästen välja aktivt, så att
+   * receptionen och städet vet vilka rum som ska vändas.
+   */
+  secondNight?: {
+    /** Frågan som visas i formuläret. */
+    question: string
+    /** Text på knappen för den som stannar. */
+    stayLabel: string
+    /** Text på knappen för den som checkar ut. */
+    leaveLabel: string
+  }
   guests: GroupGuest[]
 }
 
@@ -65,6 +78,11 @@ const nokalux: CheckinGroup = {
   bookingId: "61110",
   checkIn: "2026-09-03",
   checkOut: "2026-09-04",
+  secondNight: {
+    question: "Stannar du även fredag natt?",
+    stayLabel: "Ja, till lördag",
+    leaveLabel: "Nej, jag åker fredag",
+  },
   guests: [
     { key: "joacim-hallberg", name: "Joacim Hallberg", room: "111", roomType: "Small twin" },
     { key: "anton-karlsson", name: "Anton Karlsson", room: "111", roomType: "Small twin" },

@@ -60,6 +60,7 @@ export async function GET(
       checkIn: group.checkIn,
       checkOut: group.checkOut,
       note: group.note ?? null,
+      secondNight: group.secondNight ?? null,
     },
     guests: group.guests.map((g) => ({
       key: g.key,
@@ -98,6 +99,7 @@ export async function POST(
     email?: unknown
     phone?: unknown
     allergies?: unknown
+    second_night?: unknown
   }
   try {
     body = await request.json()
@@ -129,6 +131,20 @@ export async function POST(
   // Frivilligt fält — sanitizeNotes ger null för tom text.
   const allergies = sanitizeNotes(body.allergies)
 
+  // Ställer gruppen frågan om extra natt måste gästen ha valt aktivt.
+  // Ett uteblivet svar får inte tolkas som "nej" — då hade receptionen
+  // och städet fått fel bild av vilka rum som ska vändas.
+  let secondNight: boolean | null = null
+  if (group.secondNight) {
+    if (typeof body.second_night !== "boolean") {
+      return NextResponse.json(
+        { error: "Välj om du stannar ytterligare en natt." },
+        { status: 400 }
+      )
+    }
+    secondNight = body.second_night
+  }
+
   const supabase = getSupabaseServiceClient()
   const { error } = await supabase.from("group_checkin_entries").insert({
     group_slug: slug,
@@ -139,6 +155,7 @@ export async function POST(
     email,
     phone,
     allergies,
+    second_night: secondNight,
   })
 
   if (error) {

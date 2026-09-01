@@ -100,6 +100,10 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 
 **Att känna till**
 
+- Sätt `secondNight` på en grupp som sträcker sig över flera nätter. Gästen
+  måste då aktivt välja om hen stannar — ett uteblivet svar tolkas aldrig som
+  "nej". Receptionens vy summerar hur många som stannar och räknar upp vilka
+  rum som ska vändas, vilket också är avstämningen mot nästa dags lista.
 - Gästen fyller i företag/position, e-post, telefon och eventuella allergier.
   Namnet väljs ur listan och skrivs inte in, eftersom det är namnet som avgör
   vilket rum gästen får.

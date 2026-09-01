@@ -29,7 +29,7 @@ export async function GET(
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from("group_checkin_entries")
-    .select("id, guest_key, guest_name, room_number, company_role, email, phone, allergies, created_at")
+    .select("id, guest_key, guest_name, room_number, company_role, email, phone, allergies, second_night, created_at")
     .eq("group_slug", slug)
     .order("created_at", { ascending: false })
 

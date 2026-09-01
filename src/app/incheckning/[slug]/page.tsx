@@ -22,6 +22,11 @@ type GroupMeta = {
   checkIn: string;
   checkOut: string;
   note: string | null;
+  secondNight: {
+    question: string;
+    stayLabel: string;
+    leaveLabel: string;
+  } | null;
 };
 type Confirmation = { name: string; room: string; roomType: string; floor: number | null };
 
@@ -60,6 +65,7 @@ export default function GroupCheckinPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [allergies, setAllergies] = useState("");
+  const [secondNight, setSecondNight] = useState<boolean | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
@@ -116,6 +122,7 @@ export default function GroupCheckinPage() {
           email,
           phone,
           allergies,
+          second_night: secondNight,
         }),
       });
       const data = await res.json();
@@ -191,6 +198,14 @@ export default function GroupCheckinPage() {
             Gå till receptionen och säg att du bor i rum <strong>{confirmation.room}</strong> så
             får du dina nycklar. Du behöver inte fylla i någon blankett.
           </p>
+
+          {group.secondNight && secondNight !== null && (
+            <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
+              {secondNight
+                ? "Du har angett att du stannar även fredag natt. Du behåller ditt rum och behöver inte checka in igen."
+                : "Du har angett att du checkar ut på fredag."}
+            </p>
+          )}
 
           {allergies.trim() !== "" && (
             <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
@@ -286,6 +301,32 @@ export default function GroupCheckinPage() {
               />
             </div>
 
+            {/* Extra natt — gästen måste välja aktivt, inget förvalt */}
+            {group.secondNight && (
+              <div className="flex flex-col gap-1.5">
+                <span className={labelCls}>{group.secondNight.question}</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: true, label: group.secondNight.stayLabel },
+                    { value: false, label: group.secondNight.leaveLabel },
+                  ].map((opt) => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      onClick={() => setSecondNight(opt.value)}
+                      className={`py-2.5 px-2 rounded-[4px] text-[11px] tracking-[0.1em] uppercase font-medium transition-colors border ${
+                        secondNight === opt.value
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white text-granite border-sand hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Allergier — frivilligt, men viktigt för köket */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="allergies" className={labelCls}>
@@ -316,7 +357,8 @@ export default function GroupCheckinPage() {
                 submitting ||
                 companyRole.trim() === "" ||
                 email.trim() === "" ||
-                phone.trim() === ""
+                phone.trim() === "" ||
+                (group.secondNight !== null && secondNight === null)
               }
               className="mt-1 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
             >
