@@ -100,6 +100,17 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 
 **Att känna till**
 
+- Sätt `secondNight` på en grupp som sträcker sig över flera nätter. Gästen
+  måste då aktivt välja om hen stannar — ett uteblivet svar tolkas aldrig som
+  "nej". Receptionens vy summerar hur många som stannar och räknar upp vilka
+  rum som ska vändas, vilket också är avstämningen mot nästa dags lista.
+- Gästen fyller i företag/position, e-post, telefon och eventuella allergier.
+  Namnet väljs ur listan och skrivs inte in, eftersom det är namnet som avgör
+  vilket rum gästen får.
+- Gästen kan ange allergier eller specialkost när hen checkar in. Fältet är
+  frivilligt. Receptionens vy visar alla allergier samlat högst upp, så att
+  köket slipper leta i tabellen, och de följer med i Excel-exporten. Detta är
+  hälsodata — använd det för måltiderna och spara det inte längre än nödvändigt.
 - Rumsnumren skickas aldrig med i namnlistan. Ett rum avslöjas bara för den som
   just fyllt i sina uppgifter. Därför importeras `group-checkin-data.ts` bara av
   API-routes, aldrig av en klientkomponent.

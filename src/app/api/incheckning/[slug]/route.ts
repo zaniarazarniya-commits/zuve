@@ -13,7 +13,7 @@
 import { NextResponse } from "next/server"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
-import { isValidEmail, normalizeAndValidatePhone } from "@/lib/validation"
+import { isValidEmail, normalizeAndValidatePhone, sanitizeNotes } from "@/lib/validation"
 import { getGroup, getGroupGuest, floorFromRoom } from "@/lib/group-checkin-data"
 
 const READ_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 60 }
@@ -60,6 +60,7 @@ export async function GET(
       checkIn: group.checkIn,
       checkOut: group.checkOut,
       note: group.note ?? null,
+      secondNight: group.secondNight ?? null,
     },
     guests: group.guests.map((g) => ({
       key: g.key,
@@ -92,7 +93,14 @@ export async function POST(
     return NextResponse.json({ error: "Okänd incheckningslänk." }, { status: 404 })
   }
 
-  let body: { guest_key?: unknown; email?: unknown; phone?: unknown }
+  let body: {
+    guest_key?: unknown
+    company_role?: unknown
+    email?: unknown
+    phone?: unknown
+    allergies?: unknown
+    second_night?: unknown
+  }
   try {
     body = await request.json()
   } catch {
@@ -105,6 +113,11 @@ export async function POST(
     return NextResponse.json({ error: "Välj ditt namn i listan." }, { status: 400 })
   }
 
+  const companyRole = sanitizeNotes(body.company_role)
+  if (!companyRole) {
+    return NextResponse.json({ error: "Fyll i företag och position." }, { status: 400 })
+  }
+
   if (!isValidEmail(body.email)) {
     return NextResponse.json({ error: "Ange en giltig e-postadress." }, { status: 400 })
   }
@@ -115,14 +128,34 @@ export async function POST(
     return NextResponse.json({ error: "Ange ett giltigt telefonnummer." }, { status: 400 })
   }
 
+  // Frivilligt fält — sanitizeNotes ger null för tom text.
+  const allergies = sanitizeNotes(body.allergies)
+
+  // Ställer gruppen frågan om extra natt måste gästen ha valt aktivt.
+  // Ett uteblivet svar får inte tolkas som "nej" — då hade receptionen
+  // och städet fått fel bild av vilka rum som ska vändas.
+  let secondNight: boolean | null = null
+  if (group.secondNight) {
+    if (typeof body.second_night !== "boolean") {
+      return NextResponse.json(
+        { error: "Välj om du stannar ytterligare en natt." },
+        { status: 400 }
+      )
+    }
+    secondNight = body.second_night
+  }
+
   const supabase = getSupabaseServiceClient()
   const { error } = await supabase.from("group_checkin_entries").insert({
     group_slug: slug,
     guest_key: guest.key,
     guest_name: guest.name,
     room_number: guest.room,
+    company_role: companyRole,
     email,
     phone,
+    allergies,
+    second_night: secondNight,
   })
 
   if (error) {

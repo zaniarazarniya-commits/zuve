@@ -22,6 +22,11 @@ type GroupMeta = {
   checkIn: string;
   checkOut: string;
   note: string | null;
+  secondNight: {
+    question: string;
+    stayLabel: string;
+    leaveLabel: string;
+  } | null;
 };
 type Confirmation = { name: string; room: string; roomType: string; floor: number | null };
 
@@ -56,8 +61,11 @@ export default function GroupCheckinPage() {
 
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Guest | null>(null);
+  const [companyRole, setCompanyRole] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [allergies, setAllergies] = useState("");
+  const [secondNight, setSecondNight] = useState<boolean | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
@@ -108,7 +116,14 @@ export default function GroupCheckinPage() {
       const res = await fetch(`/api/incheckning/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guest_key: selected.key, email, phone }),
+        body: JSON.stringify({
+          guest_key: selected.key,
+          company_role: companyRole,
+          email,
+          phone,
+          allergies,
+          second_night: secondNight,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -184,6 +199,20 @@ export default function GroupCheckinPage() {
             får du dina nycklar. Du behöver inte fylla i någon blankett.
           </p>
 
+          {group.secondNight && secondNight !== null && (
+            <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
+              {secondNight
+                ? "Du har angett att du stannar även fredag natt. Du behåller ditt rum och behöver inte checka in igen."
+                : "Du har angett att du checkar ut på fredag."}
+            </p>
+          )}
+
+          {allergies.trim() !== "" && (
+            <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
+              Vi har noterat: <strong>{allergies.trim()}</strong>
+            </p>
+          )}
+
           <p className="mt-4 text-[11px] text-granite-light leading-relaxed">
             Ta gärna en skärmbild — den här sidan går inte att öppna igen.
           </p>
@@ -223,6 +252,22 @@ export default function GroupCheckinPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
+              <label htmlFor="company-role" className={labelCls}>
+                Företag / Position
+              </label>
+              <input
+                id="company-role"
+                type="text"
+                autoComplete="organization-title"
+                value={companyRole}
+                onChange={(e) => setCompanyRole(e.target.value)}
+                placeholder="T.ex. Nokalux, säljchef"
+                required
+                className={inputCls}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className={labelCls}>
                 E-postadress
               </label>
@@ -256,6 +301,50 @@ export default function GroupCheckinPage() {
               />
             </div>
 
+            {/* Extra natt — gästen måste välja aktivt, inget förvalt */}
+            {group.secondNight && (
+              <div className="flex flex-col gap-1.5">
+                <span className={labelCls}>{group.secondNight.question}</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: true, label: group.secondNight.stayLabel },
+                    { value: false, label: group.secondNight.leaveLabel },
+                  ].map((opt) => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      onClick={() => setSecondNight(opt.value)}
+                      className={`py-2.5 px-2 rounded-[4px] text-[11px] tracking-[0.1em] uppercase font-medium transition-colors border ${
+                        secondNight === opt.value
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white text-granite border-sand hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Allergier — frivilligt, men viktigt för köket */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="allergies" className={labelCls}>
+                Allergier eller specialkost <span className="normal-case tracking-normal text-granite-light">(valfritt)</span>
+              </label>
+              <textarea
+                id="allergies"
+                rows={2}
+                value={allergies}
+                onChange={(e) => setAllergies(e.target.value)}
+                placeholder="T.ex. gluten, laktos, nötter"
+                className={`${inputCls} resize-none`}
+              />
+              <p className="text-[10px] text-granite-light leading-relaxed">
+                Lämna tomt om du inte har några. Uppgiften går till köket.
+              </p>
+            </div>
+
             {error && (
               <p role="alert" className="text-[11.5px] text-red-600 leading-snug">
                 {error}
@@ -264,7 +353,13 @@ export default function GroupCheckinPage() {
 
             <button
               type="submit"
-              disabled={submitting || email.trim() === "" || phone.trim() === ""}
+              disabled={
+                submitting ||
+                companyRole.trim() === "" ||
+                email.trim() === "" ||
+                phone.trim() === "" ||
+                (group.secondNight !== null && secondNight === null)
+              }
               className="mt-1 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
             >
               {submitting ? "Checkar in…" : "Visa mitt rum"}

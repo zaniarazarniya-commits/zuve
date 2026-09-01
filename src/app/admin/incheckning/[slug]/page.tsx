@@ -17,8 +17,11 @@ type Entry = {
   guest_key: string;
   guest_name: string;
   room_number: string;
+  company_role: string | null;
   email: string;
   phone: string;
+  allergies: string | null;
+  second_night: boolean | null;
   created_at: string;
 };
 
@@ -144,6 +147,10 @@ export default function AdminGroupCheckinPage() {
 
   const done = entries.length;
   const pct = group.total > 0 ? Math.round((done / group.total) * 100) : 0;
+  const withAllergies = entries.filter((e) => e.allergies);
+  const staying = entries.filter((e) => e.second_night === true);
+  const leaving = entries.filter((e) => e.second_night === false);
+  const asksSecondNight = entries.some((e) => e.second_night !== null);
 
   return (
     <main className="min-h-screen bg-background px-6 py-12">
@@ -214,6 +221,60 @@ export default function AdminGroupCheckinPage() {
           </button>
         </div>
 
+        {/* Natt 2 — vilka rum som ska vändas, och avstämning mot nästa dags lista */}
+        {asksSecondNight && (
+          <div className="mb-8 rounded-[4px] border border-sand bg-white px-5 py-4">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
+              Natt 2
+            </p>
+            <div className="flex gap-8">
+              <div>
+                <p className="font-serif text-[26px] text-success leading-none">
+                  {staying.length}
+                </p>
+                <p className="mt-1 text-[10.5px] text-granite">stannar</p>
+              </div>
+              <div>
+                <p className="font-serif text-[26px] text-primary leading-none">
+                  {leaving.length}
+                </p>
+                <p className="mt-1 text-[10.5px] text-granite">åker</p>
+              </div>
+            </div>
+            {leaving.length > 0 && (
+              <p className="mt-4 text-[11.5px] text-granite leading-relaxed">
+                Rum som ska vändas:{" "}
+                <strong>
+                  {[...leaving]
+                    .sort((a, b) =>
+                      a.room_number.localeCompare(b.room_number, "sv", { numeric: true })
+                    )
+                    .map((e) => e.room_number)
+                    .join(", ")}
+                </strong>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Allergier samlat — det köket behöver, utan att läsa hela tabellen */}
+        {withAllergies.length > 0 && (
+          <div className="mb-10 rounded-[4px] border border-accent/40 bg-white px-5 py-4">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
+              Allergier och specialkost ({withAllergies.length})
+            </p>
+            <ul className="flex flex-col gap-1.5">
+              {withAllergies.map((e) => (
+                <li key={e.id} className="text-[12.5px] text-foreground leading-relaxed">
+                  <span className="text-granite">Rum {e.room_number} · {e.guest_name}</span>
+                  {" — "}
+                  <span className="text-accent font-medium">{e.allergies}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Incheckade */}
         <h2 className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
           Incheckade
@@ -225,7 +286,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "E-post", "Telefon", "Tid", ""].map((h) => (
+                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Natt 2", "Tid", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -245,8 +306,27 @@ export default function AdminGroupCheckinPage() {
                   >
                     <td className="px-4 py-3 whitespace-nowrap font-medium">{e.room_number}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{e.guest_name}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-granite">
+                      {e.company_role ?? "—"}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sea">{e.email}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite">{e.phone}</td>
+                    <td className="px-4 py-3 max-w-[220px]">
+                      {e.allergies ? (
+                        <span className="text-accent font-medium">{e.allergies}</span>
+                      ) : (
+                        <span className="text-granite-light">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {e.second_night === null ? (
+                        <span className="text-granite-light">—</span>
+                      ) : e.second_night ? (
+                        <span className="text-success font-medium">Stannar</span>
+                      ) : (
+                        <span className="text-granite">Åker</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite-light">
                       {formatTime(e.created_at)}
                     </td>
