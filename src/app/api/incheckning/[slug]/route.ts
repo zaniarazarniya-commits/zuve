@@ -94,6 +94,7 @@ export async function POST(
 
   let body: {
     guest_key?: unknown
+    company_role?: unknown
     email?: unknown
     phone?: unknown
     allergies?: unknown
@@ -108,6 +109,11 @@ export async function POST(
   const guest = guestKey ? getGroupGuest(group, guestKey) : null
   if (!guest) {
     return NextResponse.json({ error: "Välj ditt namn i listan." }, { status: 400 })
+  }
+
+  const companyRole = sanitizeNotes(body.company_role)
+  if (!companyRole) {
+    return NextResponse.json({ error: "Fyll i företag och position." }, { status: 400 })
   }
 
   if (!isValidEmail(body.email)) {
@@ -129,6 +135,7 @@ export async function POST(
     guest_key: guest.key,
     guest_name: guest.name,
     room_number: guest.room,
+    company_role: companyRole,
     email,
     phone,
     allergies,

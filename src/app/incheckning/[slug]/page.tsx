@@ -56,6 +56,7 @@ export default function GroupCheckinPage() {
 
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Guest | null>(null);
+  const [companyRole, setCompanyRole] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [allergies, setAllergies] = useState("");
@@ -109,7 +110,13 @@ export default function GroupCheckinPage() {
       const res = await fetch(`/api/incheckning/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guest_key: selected.key, email, phone, allergies }),
+        body: JSON.stringify({
+          guest_key: selected.key,
+          company_role: companyRole,
+          email,
+          phone,
+          allergies,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -230,6 +237,22 @@ export default function GroupCheckinPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
+              <label htmlFor="company-role" className={labelCls}>
+                Företag / Position
+              </label>
+              <input
+                id="company-role"
+                type="text"
+                autoComplete="organization-title"
+                value={companyRole}
+                onChange={(e) => setCompanyRole(e.target.value)}
+                placeholder="T.ex. Nokalux, säljchef"
+                required
+                className={inputCls}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className={labelCls}>
                 E-postadress
               </label>
@@ -289,7 +312,12 @@ export default function GroupCheckinPage() {
 
             <button
               type="submit"
-              disabled={submitting || email.trim() === "" || phone.trim() === ""}
+              disabled={
+                submitting ||
+                companyRole.trim() === "" ||
+                email.trim() === "" ||
+                phone.trim() === ""
+              }
               className="mt-1 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
             >
               {submitting ? "Checkar in…" : "Visa mitt rum"}

@@ -100,6 +100,9 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 
 **Att känna till**
 
+- Gästen fyller i företag/position, e-post, telefon och eventuella allergier.
+  Namnet väljs ur listan och skrivs inte in, eftersom det är namnet som avgör
+  vilket rum gästen får.
 - Gästen kan ange allergier eller specialkost när hen checkar in. Fältet är
   frivilligt. Receptionens vy visar alla allergier samlat högst upp, så att
   köket slipper leta i tabellen, och de följer med i Excel-exporten. Detta är

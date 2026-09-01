@@ -17,6 +17,7 @@ type Entry = {
   guest_key: string;
   guest_name: string;
   room_number: string;
+  company_role: string | null;
   email: string;
   phone: string;
   allergies: string | null;
@@ -245,7 +246,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "E-post", "Telefon", "Allergier", "Tid", ""].map((h) => (
+                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Tid", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -265,6 +266,9 @@ export default function AdminGroupCheckinPage() {
                   >
                     <td className="px-4 py-3 whitespace-nowrap font-medium">{e.room_number}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{e.guest_name}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-granite">
+                      {e.company_role ?? "—"}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sea">{e.email}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite">{e.phone}</td>
                     <td className="px-4 py-3 max-w-[220px]">

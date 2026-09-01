@@ -25,7 +25,7 @@ export async function GET(
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from("group_checkin_entries")
-    .select("guest_key, email, phone, allergies, created_at")
+    .select("guest_key, company_role, email, phone, allergies, created_at")
     .eq("group_slug", slug)
 
   if (error) {
@@ -44,6 +44,7 @@ export async function GET(
         Rum: g.room,
         Rumstyp: g.roomType,
         Namn: g.name,
+        "Företag / Position": entry?.company_role ?? "",
         "E-post": entry?.email ?? "",
         Telefon: entry?.phone ?? "",
         "Allergier / specialkost": entry?.allergies ?? "",
