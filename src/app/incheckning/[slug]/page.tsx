@@ -16,7 +16,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { GrandSwash, GrandMonogram } from "@/components/GrandLogo";
 import { GroupLockup } from "@/components/GroupLockup";
-import { MINIBAR_MANDATE_TEXT } from "@/lib/minibar-mandate";
+import { STAY_TERMS_TEXT } from "@/lib/stay-terms";
 
 type Guest = { key: string; name: string; claimed: boolean; needsFullName: boolean };
 type GroupMeta = {
@@ -203,11 +203,15 @@ export default function GroupCheckinPage() {
   }
 
   // ============================================================
-  // STEG 3 — Kortet, innan rumsnumret
+  // STEG 3 — Villkoren, innan rumsnumret
   //
   // Rummet finns inte ens i webbläsaren här: servern håller tillbaka det
   // tills Stripe bekräftat kortet. Ingen väg förbi — kan gästen inte
   // registrera ett kort löser receptionen det.
+  //
+  // Kortet nämns en enda gång, i villkorstexten där gästen faktiskt
+  // godkänner det. Upprepas det i rubrik, knapp och fotnot blir steget
+  // en förhandling i receptionen i stället för en incheckning.
   // ============================================================
   if (confirmation?.cardRequired) {
     return (
@@ -221,18 +225,13 @@ export default function GroupCheckinPage() {
             Sista steget
           </p>
           <h1 className="font-script text-[40px] text-primary leading-tight mb-4">
-            Tack, {confirmation.name.split(" ")[0]}!
+            Villkor för vistelsen
           </h1>
           <div className="mx-auto w-8 h-px bg-accent mb-5" />
 
-          <p className="text-[12.5px] text-granite leading-relaxed">
-            Registrera ett kort för minibaren, så visar vi ditt rumsnummer.
-          </p>
-
-          <div className="mt-6 rounded-[4px] border border-sand bg-white px-5 py-5 text-left">
-            <p className={labelCls}>Minibar</p>
-            <p className="mt-3 text-[11.5px] text-granite leading-relaxed">
-              {MINIBAR_MANDATE_TEXT}
+          <div className="rounded-[4px] border border-sand bg-white px-5 py-5 text-left">
+            <p className="text-[11.5px] text-granite leading-relaxed">
+              {STAY_TERMS_TEXT}
             </p>
             {cardError && (
               <p role="alert" className="mt-3 text-[11.5px] text-red-600 leading-snug">
@@ -243,15 +242,14 @@ export default function GroupCheckinPage() {
               type="button"
               onClick={handleRegisterCard}
               disabled={cardLoading}
-              className="mt-4 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
+              className="mt-5 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
             >
-              {cardLoading ? "Öppnar…" : "Registrera kort och se mitt rum"}
+              {cardLoading ? "Öppnar…" : "Godkänn och fortsätt"}
             </button>
           </div>
 
           <p className="mt-5 text-[11px] text-granite-light leading-relaxed">
-            Kortet hanteras av Stripe och sparas aldrig hos hotellet. Går det
-            inte att registrera — säg till i receptionen så löser vi det.
+            Går något inte igenom — säg till i receptionen så hjälper vi Er.
           </p>
 
           <div className="mt-8">
@@ -316,12 +314,12 @@ export default function GroupCheckinPage() {
             </p>
           )}
 
-          {/* Minibarkort — efter rumsnumret, aldrig före. Krånglar kortet
-              ska gästen ändå ha checkat in och kunna hämta sina nycklar. */}
+          {/* Kortet efter rumsnumret — bara för grupper utan grind. Krånglar
+              kortet ska gästen ändå ha checkat in och kunna hämta sina nycklar. */}
           <div className="mt-8 rounded-[4px] border border-sand bg-white px-5 py-5 text-left">
-            <p className={labelCls}>Minibar</p>
+            <p className={labelCls}>Villkor för vistelsen</p>
             <p className="mt-3 text-[11.5px] text-granite leading-relaxed">
-              {MINIBAR_MANDATE_TEXT}
+              {STAY_TERMS_TEXT}
             </p>
             {cardError && (
               <p role="alert" className="mt-3 text-[11.5px] text-red-600 leading-snug">
@@ -337,8 +335,8 @@ export default function GroupCheckinPage() {
               {cardLoading ? "Öppnar…" : "Registrera kort"}
             </button>
             <p className="mt-3 text-[10px] text-granite-light leading-relaxed">
-              Frivilligt. Hoppar du över det löser vi minibaren i receptionen i
-              stället. Kortet hanteras av Stripe.
+              Frivilligt. Hoppar du över det löser vi det i receptionen i
+              stället.
             </p>
           </div>
 
@@ -376,7 +374,7 @@ export default function GroupCheckinPage() {
             </div>
             <p className="text-[12.5px] text-granite leading-relaxed">
               {group.cardBeforeRoom
-                ? "Fyll i dina uppgifter. Sedan registrerar du ett kort för minibaren, och därefter visar vi vilket rum du bor i."
+                ? "Vänligen fyll i era uppgifter."
                 : "Fyll i dina uppgifter så visar vi vilket rum du bor i."}
             </p>
           </div>
@@ -518,7 +516,7 @@ export default function GroupCheckinPage() {
               {submitting
                 ? "Checkar in…"
                 : group.cardBeforeRoom
-                  ? "Fortsätt till kortet"
+                  ? "Fortsätt"
                   : "Visa mitt rum"}
             </button>
 
