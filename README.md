@@ -125,9 +125,14 @@ incheckning.
   måste då aktivt välja om hen stannar — ett uteblivet svar tolkas aldrig som
   "nej". Receptionens vy summerar hur många som stannar och räknar upp vilka
   rum som ska vändas, vilket också är avstämningen mot nästa dags lista.
+- Saknar en person efternamn i deltagarlistan får hen fylla i sitt fullständiga
+  namn vid incheckningen, och det är det namnet som sparas och visas för
+  receptionen. Kravet räknas ut automatiskt: ett namn är ofullständigt om det
+  bara har en del, eller om sista delen är en enda bokstav. Sätt
+  `needsFullName: false` på en gäst som faktiskt bara har ett namn.
 - Gästen fyller i företag/position, e-post, telefon och eventuella allergier.
-  Namnet väljs ur listan och skrivs inte in, eftersom det är namnet som avgör
-  vilket rum gästen får.
+  Vem gästen är väljs alltid ur listan och skrivs aldrig in fritt, eftersom det
+  valet avgör vilket rum hen får — namnfältet ovan kompletterar bara stavningen.
 - Gästen kan ange allergier eller specialkost när hen checkar in. Fältet är
   frivilligt. Receptionens vy visar alla allergier samlat högst upp, så att
   köket slipper leta i tabellen, och de följer med i Excel-exporten. Detta är

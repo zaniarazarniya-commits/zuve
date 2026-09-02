@@ -18,7 +18,7 @@ import { GrandSwash, GrandMonogram } from "@/components/GrandLogo";
 import { GroupLockup } from "@/components/GroupLockup";
 import { MINIBAR_MANDATE_TEXT } from "@/lib/minibar-mandate";
 
-type Guest = { key: string; name: string; claimed: boolean };
+type Guest = { key: string; name: string; claimed: boolean; needsFullName: boolean };
 type GroupMeta = {
   company: string;
   checkIn: string;
@@ -64,6 +64,7 @@ export default function GroupCheckinPage() {
 
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Guest | null>(null);
+  const [fullName, setFullName] = useState("");
   const [companyRole, setCompanyRole] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -148,6 +149,7 @@ export default function GroupCheckinPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guest_key: selected.key,
+          full_name: fullName,
           company_role: companyRole,
           email,
           phone,
@@ -311,6 +313,27 @@ export default function GroupCheckinPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {selected.needsFullName && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="full-name" className={labelCls}>
+                  Ditt fullständiga namn
+                </label>
+                <input
+                  id="full-name"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="För- och efternamn"
+                  required
+                  className={inputCls}
+                />
+                <p className="text-[10px] text-granite-light leading-relaxed">
+                  I bokningen står bara en del av ditt namn. Fyll på med efternamnet.
+                </p>
+              </div>
+            )}
+
             <div className="flex flex-col gap-1.5">
               <label htmlFor="company-role" className={labelCls}>
                 Företag / Position
@@ -415,6 +438,7 @@ export default function GroupCheckinPage() {
               type="submit"
               disabled={
                 submitting ||
+                (selected.needsFullName && fullName.trim().split(/\s+/).length < 2) ||
                 companyRole.trim() === "" ||
                 email.trim() === "" ||
                 phone.trim() === "" ||
@@ -488,7 +512,11 @@ export default function GroupCheckinPage() {
               <button
                 type="button"
                 disabled={g.claimed}
-                onClick={() => setSelected(g)}
+                onClick={() => {
+                  setSelected(g);
+                  // Förifyll med listans namn så gästen bara fyller på efternamnet.
+                  setFullName(g.needsFullName ? `${g.name} ` : "");
+                }}
                 className={`w-full text-left px-4 py-3.5 rounded-[4px] border transition-colors ${
                   g.claimed
                     ? "border-sand bg-sand-light text-granite-light cursor-not-allowed"

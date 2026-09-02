@@ -35,6 +35,12 @@ export type GroupGuest = {
   room: string
   /** Gästvänlig rumstyp, t.ex. "Dubbelrum". */
   roomType: string
+  /**
+   * Tvinga fram att gästen kompletterar sitt namn, eller stäng av kravet.
+   * Utan värde avgörs det av `guestNeedsFullName`. Sätt false för någon
+   * som faktiskt bara har ett namn.
+   */
+  needsFullName?: boolean
 }
 
 export type CheckinGroup = {
@@ -195,6 +201,27 @@ export function getGroup(slug: string): CheckinGroup | null {
 /** Hämtar en person i en grupp via dess key, eller null. */
 export function getGroupGuest(group: CheckinGroup, key: string): GroupGuest | null {
   return group.guests.find((g) => g.key === key) ?? null
+}
+
+/**
+ * Ser namnet fullständigt ut? Kräver minst två delar där den sista är mer
+ * än en bokstav, så att "Maja" och "Rebecca G" räknas som ofullständiga
+ * medan "Joacim Hallberg" och "Christopher Van Leeuwen" godkänns.
+ */
+export function isCompleteName(name: string): boolean {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length < 2) return false
+  return parts[parts.length - 1].replace(/\.$/, "").length >= 2
+}
+
+/**
+ * Ska gästen ombes komplettera sitt namn vid incheckningen?
+ *
+ * Sirvoy kortar av namnen i vissa bokningar, och då står bara förnamnet
+ * eller förnamn plus en initial i listan. Receptionen behöver hela namnet.
+ */
+export function guestNeedsFullName(guest: GroupGuest): boolean {
+  return guest.needsFullName ?? !isCompleteName(guest.name)
 }
 
 /**
