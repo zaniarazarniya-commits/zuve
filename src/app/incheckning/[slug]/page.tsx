@@ -30,8 +30,15 @@ type GroupMeta = {
     stayLabel: string;
     leaveLabel: string;
   } | null;
+  cardBeforeRoom: boolean;
 };
-type Confirmation = { name: string; room: string; roomType: string; floor: number | null };
+type Confirmation = {
+  cardRequired: boolean;
+  name: string;
+  room?: string;
+  roomType?: string;
+  floor?: number | null;
+};
 
 const inputCls =
   "w-full px-4 py-3 rounded-[4px] border border-sand bg-white text-[15px] text-foreground placeholder:text-granite-light focus:outline-none focus:border-primary transition-colors";
@@ -196,9 +203,69 @@ export default function GroupCheckinPage() {
   }
 
   // ============================================================
-  // STEG 3 — Rumsnumret
+  // STEG 3 — Kortet, innan rumsnumret
+  //
+  // Rummet finns inte ens i webbläsaren här: servern håller tillbaka det
+  // tills Stripe bekräftat kortet. Ingen väg förbi — kan gästen inte
+  // registrera ett kort löser receptionen det.
   // ============================================================
-  if (confirmation) {
+  if (confirmation?.cardRequired) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
+        <div className="w-full max-w-[340px] text-center reveal-in">
+          <div className="mb-6 flex justify-center">
+            <GroupLockup company={group.company} logoWidth={150} />
+          </div>
+
+          <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
+            Sista steget
+          </p>
+          <h1 className="font-script text-[40px] text-primary leading-tight mb-4">
+            Tack, {confirmation.name.split(" ")[0]}!
+          </h1>
+          <div className="mx-auto w-8 h-px bg-accent mb-5" />
+
+          <p className="text-[12.5px] text-granite leading-relaxed">
+            Registrera ett kort för minibaren, så visar vi ditt rumsnummer.
+          </p>
+
+          <div className="mt-6 rounded-[4px] border border-sand bg-white px-5 py-5 text-left">
+            <p className={labelCls}>Minibar</p>
+            <p className="mt-3 text-[11.5px] text-granite leading-relaxed">
+              {MINIBAR_MANDATE_TEXT}
+            </p>
+            {cardError && (
+              <p role="alert" className="mt-3 text-[11.5px] text-red-600 leading-snug">
+                {cardError}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={handleRegisterCard}
+              disabled={cardLoading}
+              className="mt-4 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
+            >
+              {cardLoading ? "Öppnar…" : "Registrera kort och se mitt rum"}
+            </button>
+          </div>
+
+          <p className="mt-5 text-[11px] text-granite-light leading-relaxed">
+            Kortet hanteras av Stripe och sparas aldrig hos hotellet. Går det
+            inte att registrera — säg till i receptionen så löser vi det.
+          </p>
+
+          <div className="mt-8">
+            <GrandSwash gold width={60} className="mx-auto" />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ============================================================
+  // STEG 4 — Rumsnumret
+  // ============================================================
+  if (confirmation?.room) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
         <div className="w-full max-w-[340px] text-center reveal-in">
@@ -299,7 +366,7 @@ export default function GroupCheckinPage() {
               <GroupLockup company={group.company} logoWidth={170} />
             </div>
             <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
-              Steg 2 av 2
+              Steg 2 av {group.cardBeforeRoom ? 3 : 2}
             </p>
             <h1 className="font-script text-[40px] leading-tight text-primary">
               Hej {selected.name.split(" ")[0]}!
@@ -308,7 +375,9 @@ export default function GroupCheckinPage() {
               <div className="w-8 h-px bg-accent" />
             </div>
             <p className="text-[12.5px] text-granite leading-relaxed">
-              Fyll i dina uppgifter så visar vi vilket rum du bor i.
+              {group.cardBeforeRoom
+                ? "Fyll i dina uppgifter. Sedan registrerar du ett kort för minibaren, och därefter visar vi vilket rum du bor i."
+                : "Fyll i dina uppgifter så visar vi vilket rum du bor i."}
             </p>
           </div>
 
@@ -446,7 +515,11 @@ export default function GroupCheckinPage() {
               }
               className="mt-1 w-full py-3.5 rounded-[4px] bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
             >
-              {submitting ? "Checkar in…" : "Visa mitt rum"}
+              {submitting
+                ? "Checkar in…"
+                : group.cardBeforeRoom
+                  ? "Fortsätt till kortet"
+                  : "Visa mitt rum"}
             </button>
 
             <button

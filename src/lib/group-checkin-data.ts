@@ -69,6 +69,16 @@ export type CheckinGroup = {
     message: string
   }
   /**
+   * Kräv att gästen registrerar minibarkortet INNAN rumsnumret visas.
+   * Kortet får då ett eget steg, och rummet avslöjas först när Stripe
+   * bekräftat att kortet sparats. Ingen väg förbi — kan gästen inte
+   * registrera ett kort får receptionen lösa det manuellt.
+   *
+   * Steget hoppas över om STRIPE_SECRET_KEY saknas, eftersom det då är
+   * omöjligt att genomföra och sidan annars hade blivit en återvändsgränd.
+   */
+  cardBeforeRoom?: boolean
+  /**
    * Fråga gästen om hen stannar ytterligare en natt. Sätt bara för grupper
    * som sträcker sig över flera nätter — då måste gästen välja aktivt, så att
    * receptionen och städet vet vilka rum som ska vändas.
@@ -95,11 +105,12 @@ const nokalux: CheckinGroup = {
   checkIn: "2026-09-03",
   checkOut: "2026-09-04",
   welcome: {
-    heading: "Välkomna",
+    heading: "Välkommen!",
     message:
       "Vi har gjort i ordning era rum och ser fram emot att ha er hos oss. " +
       "Välj ditt namn nedan så visar vi var du bor.",
   },
+  cardBeforeRoom: true,
   secondNight: {
     question: "Stannar du även fredag natt?",
     stayLabel: "Ja, till lördag",
@@ -158,10 +169,11 @@ const nokaluxFredag: CheckinGroup = {
   checkIn: "2026-09-04",
   checkOut: "2026-09-05",
   welcome: {
-    heading: "Välkomna",
+    heading: "Välkommen!",
     message:
       "Vi har gjort i ordning era rum. Välj ditt namn nedan så visar vi var du bor.",
   },
+  cardBeforeRoom: true,
   note: "Namnen står som i bokningen — vissa bara med förnamn. Bor du kvar sedan i går behåller du ditt rum och behöver inte göra något här.",
   guests: [
     { key: "gustav", name: "Gustav", room: "110", roomType: "Familjerum" },
