@@ -14,7 +14,13 @@ import { NextResponse } from "next/server"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isValidEmail, normalizeAndValidatePhone, sanitizeNotes } from "@/lib/validation"
-import { getGroup, getGroupGuest, floorFromRoom } from "@/lib/group-checkin-data"
+import {
+  getGroup,
+  getGroupGuest,
+  floorFromRoom,
+  guestNeedsFullName,
+  isCompleteName,
+} from "@/lib/group-checkin-data"
 
 const READ_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 60 }
 const CHECKIN_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
@@ -67,6 +73,7 @@ export async function GET(
       key: g.key,
       name: g.name,
       claimed: claimed.has(g.key),
+      needsFullName: guestNeedsFullName(g),
     })),
   })
 }
@@ -96,6 +103,7 @@ export async function POST(
 
   let body: {
     guest_key?: unknown
+    full_name?: unknown
     company_role?: unknown
     email?: unknown
     phone?: unknown
@@ -112,6 +120,20 @@ export async function POST(
   const guest = guestKey ? getGroupGuest(group, guestKey) : null
   if (!guest) {
     return NextResponse.json({ error: "Välj ditt namn i listan." }, { status: 400 })
+  }
+
+  // Står bara förnamnet i bokningen måste gästen fylla i hela namnet —
+  // receptionen behöver det, och Sirvoy kortar av namnen i vissa bokningar.
+  let guestName = guest.name
+  if (guestNeedsFullName(guest)) {
+    const submitted = sanitizeNotes(body.full_name)
+    if (!submitted || !isCompleteName(submitted)) {
+      return NextResponse.json(
+        { error: "Fyll i ditt för- och efternamn." },
+        { status: 400 }
+      )
+    }
+    guestName = submitted.replace(/\s+/g, " ")
   }
 
   const companyRole = sanitizeNotes(body.company_role)
@@ -150,7 +172,7 @@ export async function POST(
   const { error } = await supabase.from("group_checkin_entries").insert({
     group_slug: slug,
     guest_key: guest.key,
-    guest_name: guest.name,
+    guest_name: guestName,
     room_number: guest.room,
     company_role: companyRole,
     email,
@@ -171,7 +193,7 @@ export async function POST(
   }
 
   return NextResponse.json({
-    name: guest.name,
+    name: guestName,
     room: guest.room,
     roomType: guest.roomType,
     floor: floorFromRoom(guest.room),
