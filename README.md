@@ -100,14 +100,28 @@ rumsnummer direkt. Ingen pappersblankett i receptionen.
 
 **Minibarkort (Stripe)**
 
-Efter att gästen fått sitt rumsnummer kan hen registrera ett kort som garanti
-för minibaren. Kortet sparas hos Stripe med en SetupIntent — inget debiteras vid
-incheckningen. Debiteringen görs manuellt i Stripes dashboard vid utcheckning,
-eftersom någon ändå måste titta i minibaren.
+Gästen registrerar ett kort som garanti för minibaren. Kortet sparas hos Stripe
+med en SetupIntent — inget debiteras vid incheckningen. Debiteringen görs manuellt
+i Stripes dashboard vid utcheckning, eftersom någon ändå måste titta i minibaren.
 
-Kräver `STRIPE_SECRET_KEY` i miljövariablerna. Saknas den är knappen avstängd
-och incheckningen fungerar precis som vanligt — kortet får aldrig blockera en
-incheckning.
+Kräver `STRIPE_SECRET_KEY` i miljövariablerna. Saknas den är kortsteget avstängt
+och incheckningen fungerar precis som vanligt.
+
+Var kortsteget ligger styrs av `cardBeforeRoom` på gruppen:
+
+- **`cardBeforeRoom: true`** — kortet krävs *före* rumsnumret. Gästen fyller i
+  sina uppgifter, registrerar kortet hos Stripe och får rummet först på
+  kvittosidan efteråt. Rumsnumret lämnar då aldrig servern i incheckningssvaret,
+  så grinden går inte att kringgå via webbläsarens nätverksflik. Det finns
+  ingen väg förbi och ingen "hoppa över"-knapp: kan gästen inte registrera ett
+  kort löser receptionen både kort och nyckel manuellt. Avbryter gästen hos
+  Stripe kommer hen tillbaka till kvittosidan med ett nytt försök — nyckeln
+  följer med i adressen, rumsnumret gör det inte.
+- **Utan fältet** — kortet ligger efter rumsnumret och är frivilligt. Krånglar
+  kortet är gästen ändå incheckad och kan hämta sina nycklar.
+
+Saknas Stripe-nyckeln stängs grinden av automatiskt, så att en grupp med
+`cardBeforeRoom: true` inte fastnar i en återvändsgränd.
 
 - Kortuppgifter passerar aldrig servern och lagras aldrig i Supabase. Vi sparar
   bara `stripe_customer_id`, `stripe_payment_method_id`, korttyp och fyra sista
@@ -115,7 +129,6 @@ incheckning.
 - Villkoren gästen godkänner står i `src/lib/minibar-mandate.ts` och sparas
   ordagrant på raden tillsammans med tidpunkten. Ändrar du texten: höj
   `MINIBAR_MANDATE_VERSION` och skriv inte om gamla rader.
-- Kortsteget ligger efter rumsnumret, aldrig före.
 - Använd ett eget Stripe-konto, inte det Sirvoy administrerar — Stripe
   rekommenderar det själva i dashboarden.
 

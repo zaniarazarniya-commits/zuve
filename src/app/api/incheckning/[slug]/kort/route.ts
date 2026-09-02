@@ -124,7 +124,9 @@ export async function POST(
         guest_key: guest.key,
       },
       success_url: `${origin}/incheckning/${slug}/kort/klar?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/incheckning/${slug}/kort/klar?avbrutet=1`,
+      // Nyckeln följer med så att gästen kan försöka igen efter ett avbrott,
+      // utan att rumsnumret röjs på vägen.
+      cancel_url: `${origin}/incheckning/${slug}/kort/klar?avbrutet=1&g=${encodeURIComponent(guest.key)}`,
     })
 
     if (!session.url) {

@@ -21,6 +21,7 @@ import {
   guestNeedsFullName,
   isCompleteName,
 } from "@/lib/group-checkin-data"
+import { isStripeConfigured } from "@/lib/stripe"
 
 const READ_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 60 }
 const CHECKIN_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
@@ -68,6 +69,10 @@ export async function GET(
       note: group.note ?? null,
       welcome: group.welcome ?? null,
       secondNight: group.secondNight ?? null,
+      // Kortsteget kräver Stripe. Saknas nyckeln är det omöjligt att
+      // genomföra, och då släpps gästen fram till rummet i stället för
+      // att fastna i en återvändsgränd.
+      cardBeforeRoom: Boolean(group.cardBeforeRoom) && isStripeConfigured(),
     },
     guests: group.guests.map((g) => ({
       key: g.key,
@@ -192,7 +197,17 @@ export async function POST(
     return NextResponse.json({ error: "Något gick fel, försök igen." }, { status: 500 })
   }
 
+  // Kräver gruppen kort före rummet lämnar rumsnumret inte servern här.
+  // Det avslöjas först på kvittosidan, efter att Stripe bekräftat kortet —
+  // annars hade grinden bara varit kosmetisk och gått att kringgå genom
+  // att titta i webbläsarens nätverksflik.
+  const cardRequired = Boolean(group.cardBeforeRoom) && isStripeConfigured()
+  if (cardRequired) {
+    return NextResponse.json({ cardRequired: true, name: guestName })
+  }
+
   return NextResponse.json({
+    cardRequired: false,
     name: guestName,
     room: guest.room,
     roomType: guest.roomType,
