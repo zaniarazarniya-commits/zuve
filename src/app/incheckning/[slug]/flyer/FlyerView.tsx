@@ -171,21 +171,6 @@ export function FlyerView({
 
           <div style={{ width: 36, height: 1, background: "#c9a96e", margin: "0 auto 14px" }} />
 
-          {/* Företag */}
-          <p
-            className="f-baskerville"
-            style={{
-              fontSize: 7,
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#c9a96e",
-              margin: "0 0 3px",
-              textAlign: "center",
-            }}
-          >
-            {company}
-          </p>
-
           <h1
             className="f-script"
             style={{
@@ -210,7 +195,7 @@ export function FlyerView({
               lineHeight: 1.5,
             }}
           >
-            {checkInLabel}
+            för {company} · {checkInLabel}
           </p>
 
           <div style={{ width: 36, height: 1, background: "#c9a96e", margin: "0 auto 16px" }} />

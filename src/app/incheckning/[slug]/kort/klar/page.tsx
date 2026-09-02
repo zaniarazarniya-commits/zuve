@@ -14,7 +14,8 @@ import { notFound } from "next/navigation"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { getGroup, getGroupGuest, floorFromRoom } from "@/lib/group-checkin-data"
 import { getStripeClient, isStripeConfigured } from "@/lib/stripe"
-import { GrandLogo, GrandSwash } from "@/components/GrandLogo"
+import { GrandSwash } from "@/components/GrandLogo"
+import { GroupLockup } from "@/components/GroupLockup"
 
 const labelCls = "text-[9px] tracking-[0.25em] uppercase text-granite font-medium"
 
@@ -102,7 +103,7 @@ export default async function CardDonePage({
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
       <div className="w-full max-w-[340px] text-center reveal-in">
         <div className="mb-6 flex justify-center">
-          <GrandLogo variant="light" width={150} />
+          <GroupLockup company={group.company} logoWidth={150} />
         </div>
 
         <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">

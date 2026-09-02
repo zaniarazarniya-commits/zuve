@@ -60,6 +60,7 @@ export async function GET(
       checkIn: group.checkIn,
       checkOut: group.checkOut,
       note: group.note ?? null,
+      welcome: group.welcome ?? null,
       secondNight: group.secondNight ?? null,
     },
     guests: group.guests.map((g) => ({

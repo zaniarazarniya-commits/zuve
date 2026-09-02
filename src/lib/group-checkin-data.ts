@@ -53,6 +53,16 @@ export type CheckinGroup = {
    */
   note?: string
   /**
+   * Hälsning från hotellet till gruppen. Sätts bara för grupper som ska
+   * kännas särskilt tilltalade — utan den ser sidan ut som vanligt.
+   */
+  welcome?: {
+    /** Skrivstilsrubriken på steg 1. Utan den står "Hitta ditt namn". */
+    heading: string
+    /** Kort hälsning under guldlinjen, ersätter standardinstruktionen. */
+    message: string
+  }
+  /**
    * Fråga gästen om hen stannar ytterligare en natt. Sätt bara för grupper
    * som sträcker sig över flera nätter — då måste gästen välja aktivt, så att
    * receptionen och städet vet vilka rum som ska vändas.
@@ -78,6 +88,12 @@ const nokalux: CheckinGroup = {
   bookingId: "61110",
   checkIn: "2026-09-03",
   checkOut: "2026-09-04",
+  welcome: {
+    heading: "Välkomna",
+    message:
+      "Vi har gjort i ordning era rum och ser fram emot att ha er hos oss. " +
+      "Välj ditt namn nedan så visar vi var du bor.",
+  },
   secondNight: {
     question: "Stannar du även fredag natt?",
     stayLabel: "Ja, till lördag",
@@ -135,6 +151,11 @@ const nokaluxFredag: CheckinGroup = {
   bookingId: "61112",
   checkIn: "2026-09-04",
   checkOut: "2026-09-05",
+  welcome: {
+    heading: "Välkomna",
+    message:
+      "Vi har gjort i ordning era rum. Välj ditt namn nedan så visar vi var du bor.",
+  },
   note: "Namnen står som i bokningen — vissa bara med förnamn. Bor du kvar sedan i går behåller du ditt rum och behöver inte göra något här.",
   guests: [
     { key: "gustav", name: "Gustav", room: "110", roomType: "Familjerum" },
