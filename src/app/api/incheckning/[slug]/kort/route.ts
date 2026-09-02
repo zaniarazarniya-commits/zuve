@@ -15,7 +15,7 @@ import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { getGroup, getGroupGuest } from "@/lib/group-checkin-data"
 import { getStripeClient, isStripeConfigured } from "@/lib/stripe"
-import { MINIBAR_MANDATE_TEXT, MINIBAR_MANDATE_VERSION } from "@/lib/minibar-mandate"
+import { STAY_TERMS_TEXT, STAY_TERMS_VERSION } from "@/lib/stay-terms"
 
 const CARD_RATE_LIMIT = { intervalMs: 60_000, maxRequests: 10 }
 
@@ -141,8 +141,8 @@ export async function POST(
       .update({
         stripe_customer_id: customerId,
         card_mandate_accepted_at: new Date().toISOString(),
-        card_mandate_text: MINIBAR_MANDATE_TEXT,
-        card_mandate_version: MINIBAR_MANDATE_VERSION,
+        card_mandate_text: STAY_TERMS_TEXT,
+        card_mandate_version: STAY_TERMS_VERSION,
       })
       .eq("id", entry.id)
 

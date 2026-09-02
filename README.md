@@ -126,9 +126,13 @@ Saknas Stripe-nyckeln stängs grinden av automatiskt, så att en grupp med
 - Kortuppgifter passerar aldrig servern och lagras aldrig i Supabase. Vi sparar
   bara `stripe_customer_id`, `stripe_payment_method_id`, korttyp och fyra sista
   siffror. **Lägg aldrig till kolumner för kortnummer, CVC eller giltighetstid.**
-- Villkoren gästen godkänner står i `src/lib/minibar-mandate.ts` och sparas
+- Villkoren gästen godkänner står i `src/lib/stay-terms.ts` och sparas
   ordagrant på raden tillsammans med tidpunkten. Ändrar du texten: höj
-  `MINIBAR_MANDATE_VERSION` och skriv inte om gamla rader.
+  `STAY_TERMS_VERSION` och skriv inte om gamla rader.
+- Kortet nämns en enda gång i gästens flöde: i villkorstexten, där hen
+  faktiskt godkänner det. Upprepas det i rubriker, knappar och kvitton blir
+  steget en förhandling i receptionen — därför heter knappen "Fortsätt" och
+  kvittosidan säger bara "Tack!".
 - Använd ett eget Stripe-konto, inte det Sirvoy administrerar — Stripe
   rekommenderar det själva i dashboarden.
 
@@ -150,6 +154,9 @@ Saknas Stripe-nyckeln stängs grinden av automatiskt, så att en grupp med
   frivilligt. Receptionens vy visar alla allergier samlat högst upp, så att
   köket slipper leta i tabellen, och de följer med i Excel-exporten. Detta är
   hälsodata — använd det för måltiderna och spara det inte längre än nödvändigt.
+- Namnlistan sorteras på förnamn i API-svaret. I `group-checkin-data.ts`
+  ligger deltagarna rumsvis, vilket är rätt för receptionen men ser
+  slumpmässigt ut för gästen som letar efter sig själv.
 - Rumsnumren skickas aldrig med i namnlistan. Ett rum avslöjas bara för den som
   just fyllt i sina uppgifter. Därför importeras `group-checkin-data.ts` bara av
   API-routes, aldrig av en klientkomponent.

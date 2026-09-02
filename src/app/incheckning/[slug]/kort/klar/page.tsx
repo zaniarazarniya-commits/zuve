@@ -122,9 +122,13 @@ export default async function CardDonePage({
           <GroupLockup company={group.company} logoWidth={150} />
         </div>
 
-        <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
-          {saved ? "Kort registrerat" : "Minibar"}
-        </p>
+        {/* Ingen etikett när allt gick vägen: att kortet är registrerat stod
+            på föregående sida och behöver inte upprepas här. */}
+        {!saved && (
+          <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
+            Incheckning
+          </p>
+        )}
         <h1 className="font-script text-[38px] text-primary leading-tight mb-6">
           {saved ? "Tack!" : avbrutet ? "Avbrutet" : "Något gick inte fram"}
         </h1>
@@ -142,30 +146,38 @@ export default async function CardDonePage({
           </div>
         )}
 
-        <p className="mt-6 text-[12.5px] text-granite leading-relaxed">
-          {saved
-            ? showRoom
-              ? "Ditt kort är sparat som garanti för minibaren. Inget dras om du inte tar något. Gå till receptionen och säg vilket rum du bor i, så får du dina nycklar."
-              : "Ditt kort är sparat som garanti för minibaren. Inget dras om du inte tar något. Hämta dina nycklar i receptionen."
-            : cardGate
+        {saved ? (
+          <div className="mt-7">
+            <p className="font-serif italic text-[15px] text-primary leading-relaxed">
+              Varmt välkommen till Grand Hotel Lysekil
+            </p>
+            <p className="mt-4 text-[12.5px] text-granite leading-relaxed">
+              Vänligen kom till receptionen och visa vilket rum Ni bor i, så får
+              Ni Er rumsnyckel.
+            </p>
+            <p className="mt-3 text-[12.5px] text-granite leading-relaxed">
+              Vi önskar Er en riktigt trevlig vistelse i Lysekil! Tveka inte att
+              kontakta oss i receptionen om det är något vi kan hjälpa Er med.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-6 text-[12.5px] text-granite leading-relaxed">
+            {cardGate
               ? canRetry
-                ? "Kortet är inte registrerat, så vi kan inte visa ditt rumsnummer här. Försök igen nedan — eller gå till receptionen, så ordnar vi både kortet och nyckeln där."
-                : "Kortet är inte registrerat, så vi kan inte visa ditt rumsnummer här. Gå till receptionen, så ordnar vi både kortet och nyckeln där."
+                ? "Incheckningen är inte klar, så vi kan inte visa ert rumsnummer här. Försök igen nedan — eller gå till receptionen, så ordnar vi det där."
+                : "Incheckningen är inte klar, så vi kan inte visa ert rumsnummer här. Gå till receptionen, så ordnar vi det där."
               : avbrutet
-                ? "Du avbröt kortregistreringen. Det är helt i sin ordning — säg bara till i receptionen så löser vi minibaren där."
-                : "Vi kunde inte bekräfta kortet. Din incheckning är klar ändå — nämn det i receptionen så hjälper vi dig."}
-        </p>
+                ? "Du avbröt registreringen. Det är helt i sin ordning — säg bara till i receptionen så löser vi det där."
+                : "Något gick inte fram. Din incheckning är klar ändå — nämn det i receptionen så hjälper vi dig."}
+          </p>
+        )}
 
         {canRetry && guest && (
           <div className="mt-6 rounded-[4px] border border-sand bg-white px-5 py-5">
-            <RetryCardButton
-              slug={slug}
-              guestKey={guest.key}
-              label="Registrera kort och se mitt rum"
-            />
+            <RetryCardButton slug={slug} guestKey={guest.key} label="Försök igen" />
             <p className="mt-3 text-[10px] text-granite-light leading-relaxed">
-              Kortet hanteras av Stripe och sparas aldrig hos hotellet. Ingen
-              debitering sker nu.
+              Ingen debitering sker nu. Kortuppgifterna lagras säkert hos vår
+              betalningsleverantör Stripe.
             </p>
           </div>
         )}
@@ -176,7 +188,9 @@ export default async function CardDonePage({
           </p>
         )}
 
-        {!canRetry && (
+        {/* Vägen tillbaka behövs bara när något gick fel. Är incheckningen
+            klar leder länken bara till en lista där namnet redan är taget. */}
+        {!canRetry && !saved && (
           <div className="mt-8">
             <Link
               href={`/incheckning/${slug}`}

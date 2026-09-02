@@ -74,12 +74,17 @@ export async function GET(
       // att fastna i en återvändsgränd.
       cardBeforeRoom: Boolean(group.cardBeforeRoom) && isStripeConfigured(),
     },
-    guests: group.guests.map((g) => ({
-      key: g.key,
-      name: g.name,
-      claimed: claimed.has(g.key),
-      needsFullName: guestNeedsFullName(g),
-    })),
+    // Listan sorteras på förnamn. I datafilen ligger deltagarna rumsvis,
+    // vilket är rätt för receptionen men ser slumpmässigt ut för gästen
+    // som letar efter sig själv.
+    guests: group.guests
+      .map((g) => ({
+        key: g.key,
+        name: g.name,
+        claimed: claimed.has(g.key),
+        needsFullName: guestNeedsFullName(g),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "sv")),
   })
 }
 
