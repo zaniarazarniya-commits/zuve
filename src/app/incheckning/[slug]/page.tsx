@@ -14,7 +14,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { GrandLogo, GrandSwash, GrandMonogram } from "@/components/GrandLogo";
+import { GrandSwash, GrandMonogram } from "@/components/GrandLogo";
+import { GroupLockup } from "@/components/GroupLockup";
 import { MINIBAR_MANDATE_TEXT } from "@/lib/minibar-mandate";
 
 type Guest = { key: string; name: string; claimed: boolean };
@@ -23,6 +24,7 @@ type GroupMeta = {
   checkIn: string;
   checkOut: string;
   note: string | null;
+  welcome: { heading: string; message: string } | null;
   secondNight: {
     question: string;
     stayLabel: string;
@@ -199,7 +201,7 @@ export default function GroupCheckinPage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
         <div className="w-full max-w-[340px] text-center reveal-in">
           <div className="mb-6 flex justify-center">
-            <GrandLogo variant="light" width={150} />
+            <GroupLockup company={group.company} logoWidth={150} />
           </div>
 
           <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
@@ -225,6 +227,10 @@ export default function GroupCheckinPage() {
           <p className="mt-6 text-[12.5px] text-granite leading-relaxed">
             Gå till receptionen och säg att du bor i rum <strong>{confirmation.room}</strong> så
             får du dina nycklar. Du behöver inte fylla i någon blankett.
+          </p>
+
+          <p className="mt-3 font-serif italic text-[13px] text-muted leading-relaxed">
+            Trevlig vistelse hos oss.
           </p>
 
           {group.secondNight && secondNight !== null && (
@@ -288,7 +294,7 @@ export default function GroupCheckinPage() {
         <div className="w-full max-w-[340px]">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-5">
-              <GrandLogo variant="light" width={170} />
+              <GroupLockup company={group.company} logoWidth={170} />
             </div>
             <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
               Steg 2 av 2
@@ -446,18 +452,21 @@ export default function GroupCheckinPage() {
     <main className="min-h-screen flex flex-col items-center px-6 py-12 bg-background">
       <div className="w-full max-w-[380px]">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-5">
-            <GrandLogo variant="light" width={190} />
+          <div className="flex justify-center mb-6">
+            <GroupLockup
+              company={group.company}
+              subtitle={formatDate(group.checkIn)}
+              logoWidth={190}
+            />
           </div>
-          <p className="font-baskerville text-[9px] tracking-[0.3em] uppercase text-muted font-medium mb-3">
-            {group.company} · {formatDate(group.checkIn)}
-          </p>
-          <h1 className="font-script text-[46px] leading-tight text-primary">Hitta ditt namn</h1>
+          <h1 className="font-script text-[46px] leading-tight text-primary">
+            {group.welcome?.heading ?? "Hitta ditt namn"}
+          </h1>
           <div className="mt-2 mb-4 flex justify-center">
             <div className="w-8 h-px bg-accent" />
           </div>
           <p className="text-[12.5px] text-granite leading-relaxed">
-            Välj ditt namn i listan så visar vi vilket rum du bor i.
+            {group.welcome?.message ?? "Välj ditt namn i listan så visar vi vilket rum du bor i."}
           </p>
           {group.note && (
             <p className="mt-3 text-[11.5px] text-muted leading-relaxed">{group.note}</p>
