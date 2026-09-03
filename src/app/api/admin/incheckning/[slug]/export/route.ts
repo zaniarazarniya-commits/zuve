@@ -25,7 +25,7 @@ export async function GET(
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from("group_checkin_entries")
-    .select("guest_key, company_role, email, phone, allergies, second_night, card_brand, card_last4, created_at")
+    .select("guest_key, company_role, email, phone, allergies, second_night, staff_note, card_brand, card_last4, created_at")
     .eq("group_slug", slug)
 
   if (error) {
@@ -50,6 +50,7 @@ export async function GET(
         "Allergier / specialkost": entry?.allergies ?? "",
         "Stannar natt 2": entry ? (entry.second_night === null ? "" : entry.second_night ? "Ja" : "Nej") : "",
         Minibarkort: entry?.card_last4 ? `${entry.card_brand ?? "kort"} ••${entry.card_last4}` : "",
+        Anteckning: entry?.staff_note ?? "",
         Incheckad: entry ? "Ja" : "Nej",
         Tidpunkt: entry ? new Date(entry.created_at).toLocaleString("sv-SE") : "",
       }

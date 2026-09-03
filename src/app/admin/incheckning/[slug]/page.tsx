@@ -18,10 +18,12 @@ type Entry = {
   guest_name: string;
   room_number: string;
   company_role: string | null;
-  email: string;
-  phone: string;
+  // Tomma för gäster receptionen checkat in i disken utan att fråga
+  email: string | null;
+  phone: string | null;
   allergies: string | null;
   second_night: boolean | null;
+  staff_note: string | null;
   stripe_customer_id: string | null;
   card_brand: string | null;
   card_last4: string | null;
@@ -43,6 +45,7 @@ type GroupInfo = {
   checkIn: string;
   checkOut: string;
   total: number;
+  asksSecondNight: boolean;
 };
 
 const REFRESH_MS = 15_000;
@@ -70,6 +73,16 @@ export default function AdminGroupCheckinPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Manuell incheckning: vem det gäller, plus det receptionen fyller i.
+  const [manual, setManual] = useState<Pending | null>(null);
+  const [manualEmail, setManualEmail] = useState("");
+  const [manualPhone, setManualPhone] = useState("");
+  const [manualSecondNight, setManualSecondNight] = useState<boolean | null>(null);
+  const [manualInvoiced, setManualInvoiced] = useState(false);
+  const [manualNote, setManualNote] = useState("");
+  const [manualSaving, setManualSaving] = useState(false);
+  const [manualError, setManualError] = useState<string | null>(null);
 
   // Bumpas när receptionen tagit bort en rad, för att ladda om direkt
   // istället för att vänta på nästa automatiska uppdatering.
@@ -124,8 +137,58 @@ export default function AdminGroupCheckinPage() {
     setReloadKey((k) => k + 1);
   }
 
+  function startManual(p: Pending) {
+    setManual(p);
+    setManualEmail("");
+    setManualPhone("");
+    setManualSecondNight(null);
+    setManualInvoiced(false);
+    setManualNote("");
+    setManualError(null);
+  }
+
+  async function saveManual(e: React.FormEvent) {
+    e.preventDefault();
+    if (!manual) return;
+    setManualError(null);
+    setManualSaving(true);
+    try {
+      // Kryssrutan är det receptionen använder i nio fall av tio; den
+      // fria anteckningen läggs till efter, på egen rad.
+      const note = [manualInvoiced ? "Minibar faktureras" : null, manualNote.trim() || null]
+        .filter(Boolean)
+        .join(" · ");
+
+      const res = await fetch(`/api/admin/incheckning/${slug}/entries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guest_key: manual.key,
+          email: manualEmail,
+          phone: manualPhone,
+          second_night: manualSecondNight,
+          staff_note: note,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setManualError(data.error ?? "Kunde inte spara incheckningen.");
+        return;
+      }
+      setManual(null);
+      setReloadKey((k) => k + 1);
+    } catch {
+      setManualError("Kunde inte spara incheckningen.");
+    } finally {
+      setManualSaving(false);
+    }
+  }
+
   const copyEmails = useCallback(() => {
-    const emails = entries.map((e) => e.email).join(", ");
+    const emails = entries
+      .map((e) => e.email)
+      .filter((e): e is string => Boolean(e))
+      .join(", ");
     navigator.clipboard.writeText(emails).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -289,7 +352,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Natt 2", "Kort", "Tid", ""].map((h) => (
+                  {["Rum", "Namn", "Företag / Position", "E-post", "Telefon", "Allergier", "Natt 2", "Kort", "Anteckning", "Tid", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -312,8 +375,12 @@ export default function AdminGroupCheckinPage() {
                     <td className="px-4 py-3 whitespace-nowrap text-granite">
                       {e.company_role ?? "—"}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sea">{e.email}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-granite">{e.phone}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sea">
+                      {e.email || <span className="text-granite-light">—</span>}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-granite">
+                      {e.phone || <span className="text-granite-light">—</span>}
+                    </td>
                     <td className="px-4 py-3 max-w-[220px]">
                       {e.allergies ? (
                         <span className="text-accent font-medium">{e.allergies}</span>
@@ -339,6 +406,13 @@ export default function AdminGroupCheckinPage() {
                         <span className="text-granite-light">—</span>
                       )}
                     </td>
+                    <td className="px-4 py-3 max-w-[220px]">
+                      {e.staff_note ? (
+                        <span className="text-primary">{e.staff_note}</span>
+                      ) : (
+                        <span className="text-granite-light">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite-light">
                       {formatTime(e.created_at)}
                     </td>
@@ -357,6 +431,130 @@ export default function AdminGroupCheckinPage() {
           </div>
         )}
 
+        {/* Manuell incheckning — gästen står i disken */}
+        {manual && (
+          <form
+            onSubmit={saveManual}
+            className="mb-6 rounded-[4px] border border-accent/50 bg-white px-5 py-5"
+          >
+            <p className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-1">
+              Checka in i receptionen
+            </p>
+            <p className="font-serif text-[20px] text-primary leading-tight">
+              {manual.name}
+            </p>
+            <p className="mt-1 text-[11.5px] text-granite">
+              Rum {manual.room} · {manual.roomType}
+            </p>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[9px] tracking-[0.2em] uppercase text-granite font-medium">
+                  E-post (valfritt)
+                </span>
+                <input
+                  type="email"
+                  value={manualEmail}
+                  onChange={(ev) => setManualEmail(ev.target.value)}
+                  placeholder="fornamn.efternamn@foretag.se"
+                  className="px-3 py-2.5 rounded-[4px] border border-sand bg-white text-[13px] text-foreground placeholder:text-granite-light focus:outline-none focus:border-primary"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[9px] tracking-[0.2em] uppercase text-granite font-medium">
+                  Telefon (valfritt)
+                </span>
+                <input
+                  type="tel"
+                  value={manualPhone}
+                  onChange={(ev) => setManualPhone(ev.target.value)}
+                  placeholder="070-123 45 67"
+                  className="px-3 py-2.5 rounded-[4px] border border-sand bg-white text-[13px] text-foreground placeholder:text-granite-light focus:outline-none focus:border-primary"
+                />
+              </label>
+            </div>
+
+            {group.asksSecondNight && (
+              <div className="mt-4">
+                <span className="text-[9px] tracking-[0.2em] uppercase text-granite font-medium">
+                  Natt 2
+                </span>
+                <div className="mt-1.5 flex gap-2 flex-wrap">
+                  {[
+                    { value: true, label: "Stannar" },
+                    { value: false, label: "Åker" },
+                    { value: null, label: "Vet ej" },
+                  ].map((opt) => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      onClick={() => setManualSecondNight(opt.value)}
+                      className={`py-2 px-3 rounded-[4px] text-[10px] tracking-[0.15em] uppercase font-medium border transition-colors ${
+                        manualSecondNight === opt.value
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white text-granite border-sand hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <label className="mt-4 flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={manualInvoiced}
+                onChange={(ev) => setManualInvoiced(ev.target.checked)}
+                className="mt-0.5"
+              />
+              <span className="text-[12.5px] text-foreground leading-snug">
+                Minibar faktureras
+                <span className="block text-[10.5px] text-granite-light">
+                  Gästen har inte lämnat kort — notan går till företaget.
+                </span>
+              </span>
+            </label>
+
+            <label className="mt-4 flex flex-col gap-1.5">
+              <span className="text-[9px] tracking-[0.2em] uppercase text-granite font-medium">
+                Anteckning (valfritt)
+              </span>
+              <input
+                type="text"
+                value={manualNote}
+                onChange={(ev) => setManualNote(ev.target.value)}
+                placeholder="T.ex. sen ankomst, extra säng"
+                className="px-3 py-2.5 rounded-[4px] border border-sand bg-white text-[13px] text-foreground placeholder:text-granite-light focus:outline-none focus:border-primary"
+              />
+            </label>
+
+            {manualError && (
+              <p role="alert" className="mt-4 text-[11.5px] text-red-600">
+                {manualError}
+              </p>
+            )}
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="submit"
+                disabled={manualSaving}
+                className="px-4 py-2.5 rounded-[4px] bg-primary text-white text-[10px] tracking-[0.2em] uppercase font-medium disabled:opacity-50 transition-opacity"
+              >
+                {manualSaving ? "Sparar…" : "Checka in"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setManual(null)}
+                className="px-4 py-2.5 rounded-[4px] border border-sand bg-white text-[10px] tracking-[0.2em] uppercase font-medium text-granite transition-colors hover:border-primary"
+              >
+                Avbryt
+              </button>
+            </div>
+          </form>
+        )}
+
         {/* Kvar att checka in */}
         <h2 className="text-[9px] tracking-[0.25em] uppercase text-granite font-medium mb-3">
           Kvar att checka in ({pending.length})
@@ -368,7 +566,7 @@ export default function AdminGroupCheckinPage() {
             <table className="w-full text-[12px] text-foreground">
               <thead>
                 <tr className="border-b border-sand bg-sand-light">
-                  {["Rum", "Namn", "Rumstyp"].map((h) => (
+                  {["Rum", "Namn", "Rumstyp", ""].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[9px] tracking-[0.2em] uppercase font-medium text-granite whitespace-nowrap"
@@ -389,6 +587,14 @@ export default function AdminGroupCheckinPage() {
                     <td className="px-4 py-3 whitespace-nowrap font-medium">{p.room}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{p.name}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-granite">{p.roomType}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <button
+                        onClick={() => startManual(p)}
+                        className="text-[9px] tracking-[0.15em] uppercase text-granite-light hover:text-primary transition-colors"
+                      >
+                        Checka in
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

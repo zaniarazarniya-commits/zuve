@@ -162,6 +162,12 @@ Saknas Stripe-nyckeln stängs grinden av automatiskt, så att en grupp med
   API-routes, aldrig av en klientkomponent.
 - Använd den gästvänliga rumstypen i `roomType`, inte Sirvoys interna rumsnamn —
   de innehåller anteckningar som inte ska visas för gästen.
+- Kommer någon fram till disken i stället för att skanna QR-koden checkar
+  receptionen in hen från adminvyn: "Checka in" i listan **Kvar att checka in**.
+  E-post och telefon är frivilliga där — en tom ruta är ärligare än ett påhittat
+  nummer — och kryssrutan **Minibar faktureras** sätter anteckningen som säger
+  varför raden saknar kort. Anteckningen syns i tabellen och följer med i
+  Excel-exporten.
 - Varje namn kan bara checkas in en gång. Om någon råkar välja fel namn frigör
   receptionen det med "Ta bort" i adminvyn.
 - `/admin/incheckning/<slug>` har ingen inloggning, precis som `/admin/tavling`.
