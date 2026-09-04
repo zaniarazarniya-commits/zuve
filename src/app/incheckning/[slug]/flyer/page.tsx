@@ -31,5 +31,12 @@ export default async function CheckinFlyerPage({
     year: "numeric",
   })
 
-  return <FlyerView slug={slug} company={group.company} checkInLabel={checkInLabel} />
+  return (
+    <FlyerView
+      slug={slug}
+      company={group.company}
+      checkInLabel={checkInLabel}
+      cardBeforeRoom={Boolean(group.cardBeforeRoom)}
+    />
+  )
 }
