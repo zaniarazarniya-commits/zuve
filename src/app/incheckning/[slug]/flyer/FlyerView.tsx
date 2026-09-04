@@ -18,10 +18,13 @@ export function FlyerView({
   slug,
   company,
   checkInLabel,
+  cardBeforeRoom = false,
 }: {
   slug: string;
   company: string;
   checkInLabel: string;
+  /** Grupper med kortsteg får rummet efter villkoren, inte direkt. */
+  cardBeforeRoom?: boolean;
 }) {
   // window finns inte vid serverrendering. useSyncExternalStore låter oss
   // läsa adressen utan att riskera en hydreringsavvikelse.
@@ -219,7 +222,9 @@ export function FlyerView({
               {[
                 "Skanna QR-koden med din telefon",
                 "Välj ditt namn i listan",
-                "Fyll i e-post och telefonnummer",
+                cardBeforeRoom
+                  ? "Fyll i dina uppgifter och godkänn villkoren"
+                  : "Fyll i e-post och telefonnummer",
                 "Du får ditt rumsnummer direkt",
               ].map((step, i) => (
                 <li
