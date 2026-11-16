@@ -61,7 +61,7 @@ I Sirvoy, gå till **Settings → Integrations → Webhooks**:
 
 - **URL**: `https://gast.grandhotellysekil.se/api/webhook/booking`
 - **Händelser**: Booking created, Booking modified
-- **Secret header**: `x-webhook-secret` med samma värde som `SIRVOY_WEBHOOK_SECRET`
+- **Secret header**: `x-webhook-secret` (eller `?secret=` i adressen) med samma värde som `SIRVOY_WEBHOOK_SECRET`. Saknas variabeln på servern svarar webhooken 503 och tar inte emot något.
 
 ## Gästflöde
 

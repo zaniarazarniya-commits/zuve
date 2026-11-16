@@ -7,9 +7,14 @@
 // så du kan se om allt fungerar live.
 // ============================================================
 
+if (!process.env.SIRVOY_WEBHOOK_SECRET) {
+  console.error("Sätt SIRVOY_WEBHOOK_SECRET i miljön först. Hemligheten skrivs aldrig i en fil i repot.")
+  process.exit(1)
+}
+
 async function testProdWebhook() {
   const WEBHOOK_URL = "https://gast.grandhotellysekil.se/api/webhook/booking"
-  const WEBHOOK_SECRET = "grand-lysekil-2026-secret"
+  const WEBHOOK_SECRET = process.env.SIRVOY_WEBHOOK_SECRET || ""
 
   const fakePayload = {
     version: "1.0",

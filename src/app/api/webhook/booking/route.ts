@@ -7,6 +7,7 @@
 // ============================================================
 
 import { NextResponse } from "next/server"
+import { createHash, timingSafeEqual } from "node:crypto"
 import { getSupabaseServiceClient } from "@/lib/supabase"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { sendBookingSms } from "@/lib/sms"
@@ -108,7 +109,27 @@ function isOtaProxyEmail(email: string): boolean {
 // ============================================================
 // POST — anropas av Sirvoy vid ny bokning, ändring eller avbokning.
 // ============================================================
+// Bara Sirvoy, med rätt hemlighet, får skicka bokningar. Hemligheten kommer i
+// headern x-webhook-secret eller som ?secret= i adressen (om Sirvoy inte kan
+// sätta headers). Saknas SIRVOY_WEBHOOK_SECRET på servern tas inget emot.
+function secretOk(request: Request): boolean {
+  const expected = String(process.env.SIRVOY_WEBHOOK_SECRET || "").trim()
+  if (!expected) return false
+  const provided = request.headers.get("x-webhook-secret") || new URL(request.url).searchParams.get("secret") || ""
+  const a = createHash("sha256").update(provided).digest()
+  const b = createHash("sha256").update(expected).digest()
+  return timingSafeEqual(a, b)
+}
+
 export async function POST(request: Request) {
+  if (!String(process.env.SIRVOY_WEBHOOK_SECRET || "").trim()) {
+    console.error("[Webhook] SIRVOY_WEBHOOK_SECRET saknas — webhooken är avstängd.")
+    return NextResponse.json({ error: "Webhooken är inte konfigurerad" }, { status: 503 })
+  }
+  if (!secretOk(request)) {
+    return NextResponse.json({ error: "Fel eller saknad hemlighet" }, { status: 401 })
+  }
+
   // Rate limiting
   const clientIp = getClientIp(request)
   const limit = rateLimit(`webhook:${clientIp}`, WEBHOOK_RATE_LIMIT)
